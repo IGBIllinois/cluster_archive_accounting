@@ -1,0 +1,35 @@
+<?php
+/*********
+ *
+ * settings.inc.php
+ * 
+ * Settings for archive-accounting php scripts
+ * 
+ * Joe Leigh 2015
+ *
+ *********/
+
+define("__TITLE__", "IGB Biocluster Archive Accounting");
+
+define("__MYSQL_HOST__", "");
+define("__MYSQL_USER__", "");
+define("__MYSQL_PASSWORD__", "");
+define("__MYSQL_DATABASE__", "");
+
+define("__LDAP_HOST__","");
+define("__LDAP_BASE_DN__","");
+define("__LDAP_PEOPLE_OU__","");
+define("__LDAP_GROUP_OU__","");
+define("__LDAP_BIND_USER__","");
+define("__LDAP_BIND_PASS__","");
+define("__LDAP_SSL__",FALSE);
+define("__LDAP_PORT__",389);
+
+define("__SESSION_NAME__","archive_accounting");
+define("__SESSION_TIMEOUT__",3600);
+ 
+define("__ARCHIVE_DIR__", "");
+define("__SMALL_FILE_SIZE__", 1024);
+ 
+define("__LOG_FILE__","");
+define("__ENABLE_LOG__",false);
