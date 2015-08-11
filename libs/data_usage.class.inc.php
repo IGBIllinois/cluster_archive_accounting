@@ -15,8 +15,12 @@
 		}
 		public function __destruct(){}
 		
-		public static function create($db,$account_id,$usage,$num_small_files){
-			$obj = new data_usage($db);
+		public function create($account_id,$usage,$num_small_files){
+			// If a usage tally was already created this month, remove it before adding the new one
+			$sql = "delete from archive_usage where month(usage_time)=month(NOW()) and year(usage_time)=year(NOW()) and account_id=:accountid";
+			$args = array(':accountid'=>$account_id);
+			$existing = $this->db->non_select_query($sql,$args);
+			
 			// Calculate cost
 			$cost = dataCost($usage);
 			
@@ -32,7 +36,7 @@
 			$obj->get_data_usage($obj->data_usage_id);
 			
 			// Add transaction
-			transaction::create($db,$account_id,$cost,$obj->data_usage_id);
+			transaction::create($account_id,$cost,$obj->data_usage_id);
 			
 			return $obj;
 		}

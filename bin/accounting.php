@@ -52,9 +52,6 @@ else {
 		
 		$data_usage = new data_usage($db);
 		$data_usage->create($row['id'],$usage,$numsmallfiles);
-		
-		$transaction = new transaction($db);
-		$transaction->create($row['id'],-1*$data_usage->get_cost(),$data_usage->get_id());
 	}
 
 }
