@@ -1,5 +1,5 @@
 <?php
-set_include_path(get_include_path().":../libs");
+set_include_path(get_include_path().":../libs:includes/PHPExcel_1.8.0/Classes");
 include_once('../conf/settings.inc.php');
 function my_autoloader($class_name) {
 	if(file_exists("../libs/" . $class_name . ".class.inc.php")) {
