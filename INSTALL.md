@@ -1,0 +1,18 @@
+How to install archive_accounting
+
+Dependencies
+1. PHP
+2. PHP MySQL
+3. PHP LDAP
+4. PHP XML
+
+Installation
+1. Create an alias in apache pointing to html folder
+2. Run sql/archive_accounting.sql to create the database
+3. Create a MySQL user with select/insert/delete/update permissions on the archive_accounting database
+4. Edit /conf/settings.inc.php to reflect your settings
+5. To /etc/crontab add
+
+0 5 L * * root php bin/accounting.php
+
+6. Create at least one admin user in the database
