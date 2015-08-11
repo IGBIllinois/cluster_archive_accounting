@@ -50,6 +50,7 @@
 			<tr>
 				<th>NetID</th>
 				<th>Name</th>
+				<th>Directory</th>
 				<th>Administrator</th>
 				<th>Active LDAP Account</th>
 			</tr>
