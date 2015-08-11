@@ -1,23 +1,30 @@
 <?php
 	require_once 'includes/header.inc.php';
 	
-	if(!$login_user->is_admin()){
-		exit;
+	if (!$login_user->is_admin()) {
+        exit;
 	}
 	
-	$start_date = date('Ym')."01";
-	$end_date = date('Ymd',strtotime('-1 second',strtotime('+1 month',strtotime($start_date))));
-	if (isset($_GET['start_date']) && isset($_GET['end_date'])){
-		$start_date = $_GET['start_date'];
-		$end_date = $_GET['end_date'];
+	if (isset($_GET['year'])) {
+		$year = $_GET['year'];
+	}
+	else { 
+		$month = date('m');
+		if ($month < 7) {
+			$year = date('Y');			
+		} else {
+			$year = date('Y') + 1;
+		}
+
 	}
 	
-	$month_name = date('F',strtotime($start_date));
-	$year = date('Y',strtotime($start_date));
+	$previous_year = $year -1;
+	$next_year =$year +1;
+	$start_date = $year-1 . "0701";
+	$end_date = $year . "0630";
 	
-	$stats = new statistics($db);
-	
-	$url_navigation = html::get_url_navigation($_SERVER['PHP_SELF'],$start_date,$end_date);
+	$back_url = $_SERVER['PHP_SELF'] . "?year=" . $previous_year;
+	$forward_url = $_SERVER['PHP_SELF'] . "?year=" . $next_year;
 	
 	$graph_type_array[0]['type'] = 'top_usage_users';
 	$graph_type_array[0]['title'] = 'Usage';
@@ -27,39 +34,44 @@
 	$graph_type_array[2]['title'] = 'Cost';
 	$graph_type_array[3]['type'] = 'top_smallfiles_users';
 	$graph_type_array[3]['title'] = 'Small Files';
-	
+
 	$graph_type = $graph_type_array[0]['type'];
-	if(isset($_POST['graph_type'])){
-		$graph_type = $_POST['graph_type'];
-	}
-	$get_array = array('graph_type'=>$graph_type,'start_date'=>$start_date,'end_date'=>$end_date);
+	if (isset($_POST['graph_type'])) {
+	    $graph_type = $_POST['graph_type'];
 	
-	$graph_form = "<form class='form-inline' name='select_graph' id='select_graph' method='post' action='".$_SERVER['PHP_SELF']."?start_date=".$start_date."&end_date=".$end_date."'><div class='form-group'><select name='graph_type' class='form-control' onChange='document.select_graph.submit();'>";
-	foreach($graph_type_array as $graph){
-		$graph_form .= "<option value='" . $graph['type'] . "' ";
+	}
+	$get_array  = array('graph_type'=>$graph_type, 'start_date'=>$start_date, 'end_date'=>$end_date);
+	
+	$graph_form = "<form class='form-inline' name='select_graph' id='select_graph' method='post' action='" . $_SERVER['PHP_SELF']. "?start_date=" . $start_date . "&end_date=" . $end_date . "'><div class='form-group'><select name='graph_type' class='form-control' onChange='document.select_graph.submit();'>";
+	
+	foreach ($graph_type_array as $graph) {
+        $graph_form .= "<option value='" . $graph['type'] . "' ";
         if ($graph_type == $graph['type']) {
-                $graph_form .= "selected='selected'";
+            $graph_form .= "selected='selected'";
         }
         $graph_form .= ">" . $graph['title'] . "</option>\n";
 	}
-	$graph_form .= "</select></div></form>"
-?>
-<h3>Monthly Stats - <?php echo $month_name; ?></h3>
-<ul class='pager'>
-	<li class="previous"><a href="<?php echo $url_navigation['back_url'];?>">Previous Month</a></li>
-	<?php
-        $next_month = strtotime('+1 day', strtotime($end_date));
-        $today = mktime(0,0,0,date('m'),date('d'),date('y'));
-		if ($next_month > $today) {
-            echo "<li class='next disabled'><a href='#'>Next Month</a></li>";
-        }
-        else {
-            echo "<li class='next'><a href='" . $url_navigation['forward_url'] . "'>Next Month</a></li>";
-        }
-    ?>
-</ul>
-<table class="table table-striped table-condensed table-bordered">
-	<tbody>
+	
+	$graph_form .= "</div></select></form>";
+	
+	$stats = new statistics($db);
+	?>
+	<h3>Fiscal Yearly Stats - <?php echo $year;?></h3>
+	<ul class="pager">
+		<li class="previous"><a href="<?php echo $back_url;?>">Previous Year</a></li>
+		<?php
+            $next_year = strtotime('+1 day', strtotime($end_date));
+            $today = mktime(0,0,0,date('m'),date('d'),date('y'));
+            if ($next_year > $today) {
+                echo "<li class='next disabled'><a href='#'>Next Year</a></li>";
+            }
+            else {
+                echo "<li class='next'><a href='" . $forward_url . "'>Next Year</a></li>";
+            }
+        ?>
+	</ul>
+	
+	<table class="table table-bordered table-condensed table-striped">
 		<tr>
 			<td>Usage (TB):</td>
 			<td><?php echo $stats->get_total_usage($start_date,$end_date,true);?> TB</td>

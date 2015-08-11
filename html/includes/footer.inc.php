@@ -13,7 +13,7 @@
 					<li><a href="stats_accumulated.php">Accumulated Stats</a></li>
 					<li><a href="stats_monthly.php">Monthly Stats</a></li>
 					<li><a href="stats_yearly.php">Yearly Stats</a></li>
-					<li><a href="#">Fiscal Stats</a></li>
+					<li><a href="stats_fiscal.php">Fiscal Stats</a></li>
 					<li><a href="list_users.php">List Users</a></li>
 					<li><a href="add_user.php">Add User</a></li>
 					<li><a href="log_transaction.php">Log Transaction</a></li>

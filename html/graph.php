@@ -35,7 +35,7 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row[0]),
-					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)) 
+					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)." TB") 
 				))
 			);
 		}
@@ -51,7 +51,7 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row[0]),
-					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)) 
+					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)." TB") 
 				))
 			);	
 		}
@@ -115,7 +115,7 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row[0]),
-					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)) 
+					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)." TB") 
 				))
 			);
 		}
@@ -131,7 +131,7 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row[0]),
-					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)) 
+					array("v"=>floatval($row[1]), "f"=>number_format($row[1],4)." TB") 
 				))
 			);	
 		}
@@ -179,7 +179,23 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row['username']),
-					array("v"=>floatval($row['total_usage']), "f"=>number_format($row['total_usage'],4)) 
+					array("v"=>floatval($row['total_usage']), "f"=>number_format($row['total_usage'],4)." TB") 
+				))
+			);
+		}
+		echo json_encode($jsonData);
+	}
+	else if($graph_type=='top_delta_usage_users'){
+		$stats = new statistics($db);
+		$data = $stats->get_top_delta_usage_users($start_date,$end_date,8);
+		$jsonData = array();
+		$jsonData['cols'] = array( array("label"=>"User","type"=>"string"),array("label"=>"∆ Usage (TB)","type"=>"number") );
+		$jsonData['rows'] = array();
+		foreach($data as $row){
+			array_push($jsonData['rows'],
+				array( "c"=>array( 
+					array("v"=>$row['username']),
+					array("v"=>floatval($row['total_delta']), "f"=>number_format($row['total_delta'],4)." TB") 
 				))
 			);
 		}

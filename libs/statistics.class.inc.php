@@ -8,7 +8,7 @@
 		public function __destruct(){}
 		
 		public function get_total_usage($start_date,$end_date,$format=0){
-			$sql = "select sum(directory_size)/1048576 as `usage` from archive_usage where date(usage_time) between :start and :end";
+			$sql = "select sum(table1.`usage`)/1048576 as `usage` from (select max(directory_size) as `usage` from archive_usage where date(usage_time) between :start and :end group by account_id) as table1";
 			$args = array(':start'=>$start_date,':end'=>$end_date);
 			$result = $this->db->query($sql,$args);
 			$total_usage = $result[0]['usage'];
@@ -22,11 +22,18 @@
 		}
 		
 		public function get_total_delta_usage($start_date,$end_date,$format=0){
-			$sql = "select (sum(u.directory_size) - coalesce((select sum(u1.directory_size from archive_usage u1 where ";
+			$sql = "select sum(table1.delta)/1048576 as delta from (select ( coalesce((select `directory_size` from archive_usage where date(usage_time)<=:enddate and account_id=u.account_id order by usage_time desc limit 1),0)-coalesce((select directory_size from archive_usage where date(usage_time)<=:startdate and account_id=u.account_id order by usage_time desc limit 1),0) ) as delta from archive_usage u group by u.account_id) as table1"; // Trust me.
+			$args = array(':startdate'=>$start_date, ':enddate'=>$end_date);
+			$result = $this->db->query($sql,$args);
+			$total_delta = $result[0]['delta'];
+			if($format == true){
+				$total_delta = number_format($total_delta,4);
+			}
+			return $total_delta;
 		}
 		
 		public function get_total_smallfiles($start_date,$end_date,$format=0){
-			$sql = "select sum(num_small_files) as smallfiles from archive_usage where date(usage_time) between :start and :end";
+			$sql = "select sum(table1.total_smallfiles) as smallfiles from (select max(num_small_files) as total_smallfiles from archive_usage left join accounts on account_id=accounts.id where date(usage_time) between :start and :end group by username) as table1";
 			$args = array(':start'=>$start_date,':end'=>$end_date);
 			$result = $this->db->query($sql,$args);
 			$total_smallfiles = $result[0]['smallfiles'];
@@ -149,6 +156,29 @@
 			}
 			return $result;
 		}
+		public function get_top_delta_usage_users($start_date,$end_date,$top){
+			$sql = "select ( coalesce((select `directory_size` from archive_usage where date(usage_time)<=:end and account_id=u.account_id order by usage_time desc limit 1),0)-coalesce((select directory_size from archive_usage where date(usage_time)<=:start and account_id=u.account_id order by usage_time desc limit 1),0) )/1048576 as total_delta, a.username as username from archive_usage u left join accounts a on a.id=u.account_id group by u.account_id order by total_delta desc";
+			$args = array(":start"=>$start_date,":end"=>$end_date);
+			$alldelta = $this->db->query($sql,$args);
+			$top_delta = 0;
+			if(count($alldelta)>$top){
+				$total_delta=0;
+				$i=0;
+				foreach($alldelta as $delta){
+					if($i<$top){
+						$top_delta += $delta['total_delta'];
+					}
+					$total_delta += $delta['total_delta'];
+					$i++;
+				}
+				$result = array_slice($alldelta,0,$top,true);
+				$result[$top]['username'] = "Other";
+				$result[$top]['total_delta'] = $total_delta - $top_delta;
+			} else {
+				$result = $alldelta;
+			}
+			return $result;
+		}
 		public function get_top_cost_users($start_date,$end_date,$top){
 			$sql = "select sum(cost) as total_cost, username from archive_usage left join accounts on account_id=accounts.id where date(usage_time) between :start and :end group by username order by total_cost desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date);
@@ -173,7 +203,7 @@
 			return $result;
 		}
 		public function get_top_smallfiles_users($start_date,$end_date,$top){
-			$sql = "select sum(num_small_files) as total_smallfiles, username from archive_usage left join accounts on account_id=accounts.id where date(usage_time) between :start and :end group by username order by total_smallfiles desc";
+			$sql = "select max(num_small_files) as total_smallfiles, username from archive_usage left join accounts on account_id=accounts.id where date(usage_time) between :start and :end group by username order by total_smallfiles desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date);
 			$allsmallfiles = $this->db->query($sql,$args);
 			$top_smallfiles = 0;
