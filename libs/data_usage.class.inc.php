@@ -22,23 +22,34 @@
 			$existing = $this->db->non_select_query($sql,$args);
 			
 			// Calculate cost
-			$cost = dataCost($usage);
+			$cost = $this->dataCost($usage);
 			
 			// Subtract amount already paid for
-			$latestUsage = data_usage::latestUsage($db);
-			$paid = dataCost($latestUsage->directory_size);
+			$latestUsage = data_usage::latestUsage($this->db,$account_id);
+			$paid = $this->dataCost($latestUsage->directory_size);
 			$cost = max(0,$cost-$paid);
 			
 			// Save info to database
-			$sql = "insert into `archive_usage` (`accountid`,`directory_size`,`num_small_files`,`datetime`,`cost`) values (:accountid,:usage,:smallfiles,NOW(),:cost)";
+			$sql = "insert into `archive_usage` (`account_id`,`directory_size`,`num_small_files`,`usage_time`,`cost`) values (:accountid,:usage,:smallfiles,NOW(),:cost)";
 			$args = array(':accountid'=>$account_id,':usage'=>$usage,':smallfiles'=>$num_small_files,':cost'=>$cost);
-			$obj->data_usage_id = $db->insert_query($sql,$args);
-			$obj->get_data_usage($obj->data_usage_id);
+			$this->data_usage_id = $this->db->insert_query($sql,$args);
+			$this->get_data_usage($this->data_usage_id);
 			
 			// Add transaction
-			transaction::create($account_id,$cost,$obj->data_usage_id);
+			$trans = new transaction($this->db);
+			$trans->create($account_id,$cost,$this->data_usage_id);
 			
-			return $obj;
+			return $this;
+		}
+		
+		private function dataCost($usage){
+			$settings = new settings($this->db);
+			if($usage < intval($settings->get_setting("min_billable_data"))){
+				$cost = 0;
+			} else {
+				$cost = intval($settings->get_setting("data_cost")) * ceil($usage / 1048576.0);
+			}
+			return $cost;
 		}
 		
 		public static function latestUsage($db,$account_id){

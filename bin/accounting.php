@@ -17,19 +17,8 @@ if ($sapi_type != 'cli') {
 	echo "Error: This script can only be run from the command line.\n";
 }
 else {
-	
-	function dataCost($usage){
-		if($usage < intval($settings->get_setting("min_billable_data"))){
-			$cost = 0;
-		} else {
-			$cost = intval($settings->get_setting("data_cost")) * ceil($usage / 1048576.0);
-		}
-		return $cost;
-	}
-	
 	// Connect to database
 	$db = new db(__MYSQL_HOST__,__MYSQL_DATABASE__,__MYSQL_USER__,__MYSQL_PASSWORD__);
-	$settings = new settings($db);
 
 	// Get directories from database
 	$rows = $db->query("select archive_directory,id,username from accounts where is_enabled=1 and archive_directory is not null");

@@ -69,8 +69,8 @@ class db {
 	//returns the id number of the new record, 0 if it fails
 	public function insert_query($sql,$args=[]) {
 		$result = $this->link->prepare($sql);
-		$result->execute($args);
-		if ($result === false) {
+		$retVal = $result->execute($args);
+		if ($retVal === false) {
 			functions::log_message("INSERT ERROR: " . $sql);
 		}
 		return $this->link->lastInsertId();
