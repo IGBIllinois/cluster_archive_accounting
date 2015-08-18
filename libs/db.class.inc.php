@@ -72,6 +72,7 @@ class db {
 		$retVal = $result->execute($args);
 		if ($retVal === false) {
 			functions::log_message("INSERT ERROR: " . $sql);
+			var_dump($this->link->errorInfo());
 		}
 		return $this->link->lastInsertId();
 

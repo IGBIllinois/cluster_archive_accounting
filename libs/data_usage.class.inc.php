@@ -17,6 +17,7 @@
 		
 		public function create($account_id,$usage,$num_small_files){
 			// If a usage tally was already created this month, remove it before adding the new one
+			//  The associated transaction and file entries will be removed automatically.
 			$sql = "delete from archive_usage where month(usage_time)=month(NOW()) and year(usage_time)=year(NOW()) and account_id=:accountid";
 			$args = array(':accountid'=>$account_id);
 			$existing = $this->db->non_select_query($sql,$args);
@@ -35,9 +36,11 @@
 			$this->data_usage_id = $this->db->insert_query($sql,$args);
 			$this->get_data_usage($this->data_usage_id);
 			
-			// Add transaction
-			$trans = new transaction($this->db);
-			$trans->create($account_id,$cost,$this->data_usage_id);
+			// Add transaction if necessary
+			if($cost>0){
+				$trans = new transaction($this->db);
+				$trans->create($account_id,$cost,$this->data_usage_id);
+			}
 			
 			return $this;
 		}
@@ -82,6 +85,9 @@
 		}
 		public function get_cost(){
 			return $this->cost;
+		}
+		public function get_smallfiles(){
+			return $this->num_small_files;
 		}
 	
 	}

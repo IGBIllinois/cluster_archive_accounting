@@ -20,6 +20,22 @@ CREATE TABLE `accounts` (
 
 
 
+# Dump of table archive_files
+# ------------------------------------------------------------
+
+CREATE TABLE `archive_files` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `filename` varchar(256) NOT NULL DEFAULT '',
+  `filesize` int(11) NOT NULL,
+  `usage_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `file_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `usage_id` (`usage_id`),
+  CONSTRAINT `archive_files_ibfk_1` FOREIGN KEY (`usage_id`) REFERENCES `archive_usage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
 # Dump of table archive_usage
 # ------------------------------------------------------------
 
@@ -67,6 +83,8 @@ CREATE TABLE `transactions` (
   `amount` int(11) NOT NULL,
   `usage_id` int(11) unsigned DEFAULT NULL,
   `transaction_time` datetime NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `usage_id` (`usage_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`usage_id`) REFERENCES `archive_usage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
