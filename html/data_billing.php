@@ -22,10 +22,10 @@
 	foreach($data_bill as $value) {
 // 		if ($value['Billed Cost'] > 0) {
 			$data_html .= "<tr>";
-			$data_html .= "<td>".$value['username']."</td>";
+			$data_html .= "<td>".$value['Username']."</td>";
 			$data_html .= "<td>".__ARCHIVE_DIR__.$value['Directory']."</td>";
 			$data_html .= "<td>$".number_format($value['Cost'],2)."</td>";
-			$data_html .= "<td>$".number_format($value['balance'],2)."</td>";
+			$data_html .= "<td>$".number_format($value['Balance'],2)."</td>";
 			$data_html .= "<td>".$value['CFOP']."</td>";
 			$data_html .= "</tr>";
 // 		}

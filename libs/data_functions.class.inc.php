@@ -3,7 +3,8 @@
 class data_functions {
 
 	public static function get_data_bill($db,$month,$year) {
-		$sql = "SELECT accounts.username, accounts.archive_directory as 'Directory', ROUND(archive_usage.directory_size / 1048576,3) as 'Terabytes', sum(archive_usage.cost) as 'Cost', sum(transactions.amount) as balance, accounts.cfop as 'CFOP' FROM archive_usage LEFT JOIN accounts ON archive_usage.account_id=accounts.id left join transactions on transactions.account_id=accounts.id WHERE YEAR(archive_usage.usage_time)=:year AND MONTH(archive_usage.usage_time)=:month group by accounts.id ORDER BY Directory ASC";
+		// This SQL statement uses column aliases as they'll be fed directly into a spreadsheet in some cases
+		$sql = "SELECT accounts.username as Username, accounts.archive_directory as Directory, ROUND(archive_usage.directory_size / 1048576,3) as Usage, archive_usage.cost as Cost, (select sum(transactions.amount) from transactions where transactions.account_id=accounts.id and ((month(transaction_time)<=:month and year(transaction_time)=year) or year(transaction_time)<:year)) as Balance, accounts.cfop as CFOP FROM archive_usage LEFT JOIN accounts ON archive_usage.account_id=accounts.id WHERE YEAR(archive_usage.usage_time)=:year AND MONTH(archive_usage.usage_time)=:month group by accounts.id ORDER BY Directory ASC";
 		$args = array(':year'=>$year,':month'=>$month);
     	return $db->query($sql,$args);
 	}
