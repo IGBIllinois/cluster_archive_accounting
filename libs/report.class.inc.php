@@ -1,6 +1,7 @@
 <?php
 require_once 'PHPExcel.php';
 class report {
+	// Outputs the given data as an Excel 2003 document with the given filename
 	public static function create_xls_report($data,$filename){
 		$excel_file = self::create_generic_excel($data);
 		header('Content-Type: application/vnd.ms-excel');
@@ -11,6 +12,7 @@ class report {
 		$writer->save('php://output');
 	}
 	
+	// Outputs the given data as an Excel 2007+ document with the given filename
 	public static function create_xlsx_report($data,$filename){
 		$excel_file = self::create_generic_excel($data);
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -21,6 +23,7 @@ class report {
 		$writer->save('php://output');
 	}
 	
+	// Performs setup for either type of excel file
 	public static function create_generic_excel($data) {
 		$excel_file = new PHPExcel();
 		$excel_file->setActiveSheetIndex(0);
@@ -58,6 +61,7 @@ class report {
 		return $excel_file;
 	}
 	
+	// Outputs the given data as a CSV file with the given filename
 	public static function create_csv_report($data,$filename){
 		$delimiter = ",";
 		$file_handle = fopen('php://output','w');

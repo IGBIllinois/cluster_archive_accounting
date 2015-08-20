@@ -30,7 +30,7 @@
 			$data_html .= "</tr>";
 // 		}
 	}
-	
+	$statistics = new statistics($db);	
 ?>
 <h3>Data Billing Monthly Report - <?php echo $month_name." ".$year; ?></h3>
 <ul class='pager'>
@@ -61,15 +61,9 @@
     <?php echo $data_html; ?>
     <tr>
         <td colspan="2">Total Cost:</td>
-        <td colspan='3'>$<?php echo data_stats::get_total_cost($db,$start_date,$end_date,1); ?>
+        <td colspan='3'>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?>
         </td>
 	</tr>
-<!--
-	<tr>
-		<td>Billed Cost:</td>
-		<td colspan='5'>$<?php //echo data_stats::get_billed_cost($db,$start_date,$end_date,1); ?>
-    </tr>
--->
 </table>
 <form class="form-inline" method="post" action="report.php">
 	<input type="hidden" name="month" value="<?php echo $month; ?>"/>

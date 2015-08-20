@@ -124,7 +124,7 @@
 		</tr>
 		<tr>
 			<td>Billing Dates:</td>
-			<td><?php echo functions::get_pretty_date($start_date); ?> - <?php echo functions::get_pretty_date($end_date); ?></td>
+			<td><?php echo html::get_pretty_date($start_date); ?> - <?php echo html::get_pretty_date($end_date); ?></td>
 		</tr>
 	</table>
 

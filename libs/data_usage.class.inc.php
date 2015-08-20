@@ -1,4 +1,5 @@
 <?php
+	// Represents the entry in the database corresponding to a monthly data usage scan for a user.
 	class data_usage {
 		private $db;
 		private $data_usage_id;
@@ -15,6 +16,7 @@
 		}
 		public function __destruct(){}
 		
+		// Inserts an entry with the given data into the database, and loads that entry into this object.
 		public function create($account_id,$usage,$num_small_files){
 			// If a usage tally was already created this month, remove it before adding the new one
 			//  The associated transaction and file entries will be removed automatically.
@@ -23,7 +25,7 @@
 			$existing = $this->db->non_select_query($sql,$args);
 			
 			// Calculate cost
-			$cost = $this->dataCost($usage);
+			$cost = self::dataCost($usage);
 			
 			// Subtract amount already paid for
 			$latestUsage = data_usage::latestUsage($this->db,$account_id);
@@ -45,8 +47,9 @@
 			return $this;
 		}
 		
-		private function dataCost($usage){
-			$settings = new settings($this->db);
+		// Calculates the cost of a given directory size, based on the current settings and the previous month's usage data.
+		private static function dataCost($db,$usage){
+			$settings = new settings($db);
 			if($usage < intval($settings->get_setting("min_billable_data"))){
 				$cost = 0;
 			} else {
@@ -55,6 +58,7 @@
 			return $cost;
 		}
 		
+		// Returns a data_usage object representing the latest usage scan for the given user.
 		public static function latestUsage($db,$account_id){
 			$sql = "select id from archive_usage where account_id=:accountid order by usage_time desc limit 1";
 			$args = array(':accountid'=>$account_id);
@@ -66,9 +70,7 @@
 			}
 		}
 		
-		public function get_directory_size(){
-			return $this->directory_size;
-		}
+		// Loads the data usage entry with the given id into this object
 		public function get_data_usage($id){
 			$sql = "select * from archive_usage where id=:id";
 			$args = array(':id'=>$id);
@@ -88,6 +90,9 @@
 		}
 		public function get_smallfiles(){
 			return $this->num_small_files;
+		}
+		public function get_directory_size(){
+			return $this->directory_size;
 		}
 	
 	}

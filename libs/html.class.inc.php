@@ -1,5 +1,5 @@
 <?php
-
+// Various html-generation functions
 class html {
 
 	//get_pages_html()
@@ -53,6 +53,7 @@ class html {
 
 	}
 
+	// Returns the number of pages for a given number of records and count per page
 	public static function get_num_pages($numRecords,$count) {
 	        $numPages = floor($numRecords/$count);
         	$remainder = $numRecords % $count;
@@ -62,6 +63,7 @@ class html {
         	return $numPages;
 	}
 
+	// Calculates and returns the urls to go back or forward from the given month
 	public static function get_url_navigation($url,$start_date,$end_date,$get_array = array()) {
 	        $previous_end_date = date('Ymd',strtotime('-1 second', strtotime($start_date)));
         	$previous_start_date = substr($previous_end_date,0,4) . substr($previous_end_date,4,2) . "01";
@@ -75,6 +77,7 @@ class html {
 
 	}
 
+	// Returns trs for the given users list
 	public static function get_users_rows($users,$start = 0,$count = 0) {
 		$i_start = 0;
 		$i_count = count($users);
@@ -110,7 +113,10 @@ class html {
 		return $users_html;
 	}
 
-
+	// Takes a date given as 'YYYYmmdd' and returns 'mm/dd/YYYY'
+	public static function get_pretty_date($date) {
+		return substr($date,4,2) . "/" . substr($date,6,2) . "/" . substr($date,0,4);
+	}
 
 
 }

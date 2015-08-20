@@ -20,19 +20,22 @@ else {
 	// Connect to database
 	$db = new db(__MYSQL_HOST__,__MYSQL_DATABASE__,__MYSQL_USER__,__MYSQL_PASSWORD__);
 
-	// Get directories from database
+	// Get archive directories from database
 	$rows = $db->query("select archive_directory,id,username from accounts where is_enabled=1 and archive_directory is not null");
 	$data_usage = new data_usage($db);
 	$arch_file = new archive_file($db);
 	foreach ( $rows as $key=>$row ){		
 		// Gather usage info
-		// Usage in TB
+		// Total Usage in MB
 		$usage = exec("du -am ".__ARCHIVE_DIR__.$row['archive_directory']);
 		preg_match("/^(.*)\\t/u", $usage, $matches);
 		$usage = $matches[1];
-		// Number of small files
+		
+		// Per-file info
+		// Usage in KB
 		unset($allfiles);
 		exec("find ".__ARCHIVE_DIR__.$row['archive_directory']." -type f -exec du -ak {} +",$allfiles);
+		// Tally up "small" files
 		$numsmallfiles = 0;
 		foreach ( $allfiles as $key=>$file ){
 			preg_match("/^(.*)\\t/u", $file, $matches);
@@ -41,12 +44,14 @@ else {
 			}
 		}
 		
+		// Store usage data in database
 		$data_usage->create($row['id'],$usage,$numsmallfiles);
 		foreach ( $allfiles as $key=>$file ){
 			preg_match("/^(.*)\\t(.*)/u", $file, $matches);
 			// Get date modified info for each file and save to database
 			$datestr = exec("ls -lT '".$matches[2]."' | awk '{print $6,$7,$9, $8}'");
 			$date = DateTime::createFromFormat('M d Y H:i:s',$datestr);
+			// Store file info in database
 			$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 		}
 	}

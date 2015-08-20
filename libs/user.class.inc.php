@@ -12,12 +12,8 @@ class user {
 	private $time_created;
 	private $ldap;
 	private $cfop;
-	private $default_project; //default project object
-	private $default_data_dir; //default data_dir object
 	private $email;
 	private $admin;
-	private $default_project_id;
-	private $default_data_dir_id;
 	////////////////Public Functions///////////
 
 	public function __construct($db,$ldap,$id = 0,$username = "") {
@@ -33,6 +29,8 @@ class user {
 	}
 	public function __destruct() {
 	}
+	
+	// Inserts a user into the database with the given values, then loads that user into this object. Displays errors if there are any.
 	public function create($username,$admin,$archive_dir,$cfop) {
 		$username = trim(rtrim($username));
 		
@@ -120,6 +118,7 @@ class user {
 	public function get_time_created() {
 		return $this->time_created;
 	}
+	// Gets a summary of data usage for this user for the given month
 	public function get_data_summary($month,$year) {
 		$prevmonth = $month-1;
 		$prevyear = $year;
@@ -137,15 +136,8 @@ class user {
 		return $this->db->query($sql,$args);
 		
 	}
-	public function default_project() {
-		$project = new project($this->db,0,$this->get_username());
-		return $project;
-
-	}
-	public function default_data_dir() {
-		$data_dir = new data_dir($this->db,$this->default_data_dir_id);
-		return $data_dir;
-	}
+	
+	// Checks to see if the given directory is already associated with any user
 	private function data_dir_exists($directory) {
 		$sql = "SELECT count(1) as count FROM accounts ";
 		$sql .= "WHERE archive_directory LIKE :dir ";
@@ -160,63 +152,7 @@ class user {
 		}
 	}
 	
-	public function get_projects() {
-		$sql = "SELECT * FROM projects WHERE project_enabled='1'";
-		$all_projects = $this->db->query($sql);
-		$ldap_groups = $this->ldap->get_user_groups($this->get_username());
-		$user_projects = array();
-		foreach ($ldap_groups as $group) {
-			foreach ($all_projects as $project) {
-				if ($group == $project['project_ldap_group']) {
-					array_push($user_projects,$project);
-				}
-
-			}
-
-		}
-		return $user_projects;
-
-	}
-	public function is_project_member($project) {
-		$user_projects = $this->get_projects();
-		foreach ($user_projects as $user_project) {
-                        if ($user_project['project_name'] == $project) {
-                                return true;
-                        }
-                }
-		return false;
-	}
-	public function get_queues() {
-		$sql = "SELECT queue_name,queue_ldap_group FROM queues WHERE queue_enabled='1'";
-		$all_queues = $this->db->query($sql);
-		$ldap_groups = $this->ldap->get_user_groups($this->get_username());
-		$user_queues = array();
-		foreach ($all_queues as $queue) {
-			if ($queue['queue_ldap_group'] === "") {
-				array_push($user_queues,$queue['queue_name']);
-			}
-			else {
-				foreach ($ldap_groups as $group) {
-					if ($group == $queue['queue_ldap_group']) {
-						array_push($user_queues,$queue['queue_name']);
-					}
-				}
-			}
-
-		}
-		return $user_queues;
-
-
-
-
-	}
-	public function is_supervisor() {
-		if (!$this->get_supervisor_id()) {
-			return true;
-		}
-		return false;
-
-	}
+	// Enables this user
 	public function enable() {
 		$sql = "UPDATE accounts SET is_enabled='1' WHERE id=:id LIMIT 1";
 		$args = array(':id'=>$this->get_user_id());
@@ -224,53 +160,21 @@ class user {
 		$this->enabled = true;
 		return true;
 	}
+	// Disables this user
 	public function disable() {
-		$supervising_users = $this->get_supervising_users();
 		$message;
 		$error = false;
-		if (count($supervising_users)) {
-			$message = "Unable to delete user.  User is supervising " . count($supervising_users) . " other users.";
-			$error = true;
-		}		
-		if (!$error) {
-			$sql = "UPDATE users SET user_enabled='0' WHERE user_id=:id LIMIT 1";
-			$args = array(':id'=>$this->get_user_id());
-			$this->enabled = false;
-			$this->db->non_select_query($sql,$args);
-			$this->default_project()->disable();
-			$this->default_data_dir()->disable();
-			
-			$message = "User successfully deleted";
-			return array('RESULT'=>true,'MESSAGE'=>$message);
-		}
-		else {
-			return array('RESULT'=>false,'MESSAGE'=>$message);
-		}
-
-	}
-	public function set_supervisor($supervisor_id) {
-		$sql = "UPDATE users SET user_supervisor=:supervisor WHERE user_id=:id";
-		$args = array(':supervisor'=>$supervisor_id,':id'=>$this->get_user_id());
+		
+		$sql = "UPDATE users SET user_enabled='0' WHERE user_id=:id LIMIT 1";
+		$args = array(':id'=>$this->get_user_id());
+		$this->enabled = false;
 		$this->db->non_select_query($sql,$args);
-		//gets supervisors username
-		$supervisor_sql = "SELECT user_name FROM users WHERE user_id=:id LIMIT 1";
-		$args = array(':id'=>$supervisor_id);
-		$result = $this->db->query($supervisor_sql,$args);
+		$this->default_project()->disable();
+		$this->default_data_dir()->disable();
+		
+		$message = "User successfully deleted";
+		return array('RESULT'=>true,'MESSAGE'=>$message);
 
-		$this->supervisor_id = $supervisor_id;
-		$this->supervisor_name = $result[0]['user_name'];
-		return true;
-	}
-	public function get_supervising_users() {
-		if ($this->is_supervisor()) {
-			$sql = "SELECT users.* ";
-			$sql .= "FROM users ";
-			$sql .= "WHERE user_supervisor=:id AND user_enabled='1' ";
-			$sql .= "AND user_admin='0' ORDER BY user_name ASC";
-			$args = array(':id'=>$this->get_user_id());
-			return $this->db->query($sql,$args);
-		}
-		return array();
 	}
 
 	public function has_directory(){
@@ -283,9 +187,9 @@ class user {
 
 	public function is_user() {
 		return !$this->admin;
-
-        }
+    }
 	
+	// Makes the user an admin (or not)
 	public function set_admin($admin) {
 		$sql = "UPDATE accounts SET is_admin=:admin ";
 		$sql .= "WHERE id=:id LIMIT 1";
@@ -314,145 +218,31 @@ class user {
 		}
 		return $result;
 	}
-	
-	public function email_bill($admin_email,$start_date = 0,$end_date = 0) {
-		if (($start_date == 0) && ($end_date == 0)) {
-			$end_date = date('Ymd',strtotime('-1 second', strtotime(date('Ym') . "01")));
-			$start_date = substr($end_date,0,4) . substr($end_date,4,2) . "01";
-		}
-		$month = date('m',strtotime($start_date));
-		$year = date('Y',strtotime($start_date));
 
-		$user_stats = new user_stats($this->db,$this->get_user_id(),$start_date,$end_date);
-
-		$subject = "Biocluster Accounting Bill - " . functions::get_pretty_date($start_date) . "-" . functions::get_pretty_date($end_date);
-		$to = $this->get_email();
-		$message = "<p>Biocluster Accounting Bill - " . functions::get_pretty_date($start_date) . "-" . functions::get_pretty_date($end_date) . "</p>";
-		$message .= "<br>Name: " . $this->get_full_name();
-		$message .= "<br>Username: " . $this->get_username();
-		$message .= "<br>Start Date: " . functions::get_pretty_date($start_date);
-		$message .= "<br>End Date: " . functions::get_pretty_date($end_date);
-		$message .= "<br>Number of Jobs: " . $user_stats->get_num_jobs();
-		$message .= "<p>Below is your bill.  You can go to https://biocluster.igb.illinois.edu/accounting/ ";
-		$message .= "to view a detail listing of your jobs.";
-		$message .= "<p>Cluster Usage</p>";
-		
-		$message .= $this->get_jobs_table($start_date,$end_date);
-
-
-		
-		$message .= "<p>Data Usage</p>";	
-		$message .= $this->get_data_table($month,$year);
-
-
-		$headers = "From: " . $admin_email . "\r\n";
-		$headers .= "Content-Type: text/html; charset=iso-8859-1" . "\r\n";
-		mail($to,$subject,$message,$headers," -f " . $admin_email);
-
-
-
-	}
-
-	public function get_jobs_table($start_date,$end_date) {
-		$jobs_summary = $this->get_jobs_summary($start_date,$end_date);
-		$jobs_html = "<p><table border='1'>";
-		if (count($jobs_summary)) {
-                        $jobs_html .= "<tr><td>Queue</td><td>Project</td>";
-                        $jobs_html .= "<td>Cost</td><td>Billed Amount</td><td>CFOP</td><td>Activity Code</td></tr>";
-                        foreach ($jobs_summary as $summary) {
-                                $jobs_html .= "<tr>";
-                                $jobs_html .= "<td>" . $summary['queue'] . "</td>";
-                                $jobs_html .= "<td>" . $summary['project'] . "</td>";
-                                $jobs_html .= "<td>$" . number_format($summary['total_cost'],2) . "</td>";
-                                $jobs_html .= "<td>$" . number_format($summary['billed_cost'],2) . "</td>";
-                                if (!$summary['cfop_restricted']) {
-                                        $jobs_html .= "<td>" . $summary['cfop'] . "</td>";
-                                        $jobs_html .= "<td>" . $summary['activity'] . "</td>";
-                                }
-                                else {
-                                        $jobs_html .= "<td colspan='2'>RESTRICTED</td>";
-                                }
-                                $jobs_html .= "</tr>";
-                        }
-                }
-                else {
-                        $jobs_html .= "<tr><td>No Jobs</td></tr>";
-
-                }
-		$jobs_html .= "</table>";
-		return $jobs_html;
-
-
-
-	}
-
-	public function get_data_table($month,$year) {
-
-		$data_summary = $this->get_data_summary($month,$year);
-		$data_html = "<p><table border='1'>";
-		if (count($data_summary)) {
-                        $data_html .= "<tr><td>Directory</td>";
-                        $data_html .= "<td>Type</td>";
-                        $data_html .= "<td>Project</td>";
-                        $data_html .= "<td>Terabytes</td>";
-                        $data_html .= "<td>Cost</td>";
-                        $data_html .= "<td>Billed Amount</td>";
-                        $data_html .= "<td>CFOP</td>";
-                        $data_html .= "<td>Activity Code</td>";
-                        $data_html .= "</tr>";
-                        foreach ($data_summary as $data) {
-                                $data_html .= "<tr>";
-                                $data_html .= "<td>" . $data['directory'] . "</td>";
-                                $data_html .= "<td>" . $data['data_cost_dir'] . "</td>";
-                                $data_html .= "<td>" . $data['project'] . "</td>";
-                                $data_html .= "<td>" . $data['terabytes'] . "</td>";
-                                $data_html .= "<td>$" . number_format($data['total_cost'],2) . "</td>";
-                                $data_html .= "<td>$" . number_format($data['billed_cost'],2) . "</td>";
-                                if (!$data['cfop_restricted']) {
-                                        $data_html .= "<td>".  $data['cfop'] . "</td>";
-                                        $data_html .= "<td>" . $data['activity_code'] . "</td>";
-                                }
-                                else {
-                                        $data_html .= "<td colspan='2'>RESTRICTED</td>";
-                                }
-                                $data_html .= "</tr>";
-
-
-                        }
-                }
-                else {
-                        $data_html .= "<tr><td>No Data Usage.</td></tr>";
-                }
-		$data_html .= "</table>";
-		return $data_html;
-
-
-	}
 	public function authenticate($password) {
-		$result = false;
-                $rdn = $this->get_user_rdn();
-                if (($this->ldap->bind($rdn,$password)) && ($this->get_user_exist($this->user_name))) {
-                        $result = true;
-
-                }
-                return $result;
+	$result = false;
+        $rdn = $this->get_user_rdn();
+        if (($this->ldap->bind($rdn,$password)) && ($this->get_user_exist($this->user_name))) {
+            $result = true;
         }
+        return $result;
+    }
 
 	//permission()
-        //$user_id - id of user to see if you have permissions to view his details
-        //returns true if you do have permissions, false otherwise
-        public function permission($user_id) {
-                if ($this->is_admin()) {
-                        return TRUE;
-                }
-                elseif ($this->get_user_id() == $user_id) {
-                        return TRUE;
-                }
-                else {
-                        return FALSE;
-                }
-
+    //$user_id - id of user to see if you have permissions to view his details
+    //returns true if you do have permissions, false otherwise
+    public function permission($user_id) {
+        if ($this->is_admin()) {
+            return TRUE;
         }
+        elseif ($this->get_user_id() == $user_id) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+
+    }
 
 	//////////////////Private Functions//////////
 	private function load_by_id($id) {
@@ -495,31 +285,18 @@ class user {
 		return $result[0]['count'];
 
 	}
-	private function get_disable_user_id($username) {
-
-		
-		$sql = "SELECT user_id FROM users WHERE user_name=:username AND user_enabled='0'";
-		$args = array(':username'=>$username);
-		$result = $this->db->query($sql,$args);
-		if (count($result)) {
-			return $result[0]['user_id'];
-		}
-		else {
-			return false;
-		}
-	}
 
 	private function get_user_rdn() {
-                $filter = "(uid=" . $this->get_username() . ")";       
-                $attributes = array('dn');
-                $result = $this->ldap->search($filter,'',$attributes);
-                if (isset($result[0]['dn'])) {
-                        return $result[0]['dn'];
-                }
-                else {
-                        return false;
-                }
+        $filter = "(uid=" . $this->get_username() . ")";       
+        $attributes = array('dn');
+        $result = $this->ldap->search($filter,'',$attributes);
+        if (isset($result[0]['dn'])) {
+            return $result[0]['dn'];
         }
+        else {
+            return false;
+        }
+    }
 
 	private function is_disabled($username) {
 		$sql = "SELECT count(1) as count FROM accounts WHERE username=:username ";
@@ -530,7 +307,6 @@ class user {
 			return true;
 		}
 		return false;
-
 	}
 }
 

@@ -54,6 +54,7 @@ class user_functions {
     	return $result;
 	}
 
+	// Returns number of enabled users
 	public static function get_num_users($db) {
         $sql = "SELECT count(1) as count FROM users ";
     	$sql .= "WHERE user_enabled=1";
@@ -61,6 +62,7 @@ class user_functions {
     	return $result[0]['count'];
 	}
 
+	// Returns list of all disabled users
 	public static function get_disabled_users($db) {
     	$sql = "SELECT * FROM accounts WHERE is_enabled='0' ORDER BY username ASC";
         return $db->query($sql);
