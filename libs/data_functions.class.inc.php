@@ -10,6 +10,7 @@ class data_functions {
     	return $db->query($sql,$args);
 	}
 
+	// Returns a list of all directories (absolute paths!) in the database
 	public static function get_all_directories($db) {
 		$sql = "select archive_directory from accounts where is_enabled=1 and archive_directory!='' and archive_directory is not null order by archive_directory asc";
         $result = $db->query($sql);
@@ -27,7 +28,7 @@ class data_functions {
 
 	}
 
-	// Returns a list of all the directories under the base directory.
+	// Returns a list of all the directories under the base directory (absolute paths!)
 	public static function get_existing_dirs() {
 		$root_dirs = settings::get_root_data_dirs();
 		
@@ -52,7 +53,7 @@ class data_functions {
 		return $existing_dirs;
 	}
 	
-	// Returns a list of all directories under the base directory that are not associated with a user in the database.
+	// Returns a list of all directories under the base directory that are not associated with a user in the database (absolute paths!)
 	public static function get_unmonitored_dirs($db) {
 		$full_monitored_dirs = self::get_all_directories($db);
 

@@ -118,6 +118,16 @@ class html {
 		return substr($date,4,2) . "/" . substr($date,6,2) . "/" . substr($date,0,4);
 	}
 
+	// Takes a size and the unit for that size ('B', 'KB', 'MB', 'GB') and returns a human-readable size
+	public static function human_readable_size($usage,$unit='MB',$decimal=4){
+		$units = array('B','KB','MB','GB','TB','PB');
+		$i = array_search(strtoupper($unit),$units);
+		while($usage>1024){
+			$usage /= 1024.0;
+			$i++;
+		}
+		return number_format($usage,$decimal).' '.$units[$i];
+	}
 
 }
 
