@@ -10,6 +10,23 @@ class data_functions {
     	return $db->query($sql,$args);
 	}
 
+	public static function get_all_directories($db) {
+		$sql = "select archive_directory from accounts where is_enabled=1 and archive_directory!='' and archive_directory is not null order by archive_directory asc";
+        $result = $db->query($sql);
+        for ($i=0;$i<count($result);$i++) {
+	        $result[$i]['archive_directory'] = __ARCHIVE_DIR__.$result[$i]['archive_directory'];
+		    if (is_dir($result[$i]['archive_directory'])) {
+		        $result[$i]['dir_exists'] = true;
+		    }
+		    else {
+	            $result[$i]['dir_exists'] = false;
+		    }
+        }
+        return $result;
+
+
+	}
+
 	// Returns a list of all the directories under the base directory.
 	public static function get_existing_dirs() {
 		$root_dirs = settings::get_root_data_dirs();
@@ -17,10 +34,14 @@ class data_functions {
 		$existing_dirs = array();
 		foreach ($root_dirs as $dir) {
 			
+			$found_files = array();
+			$found_files = array_diff(scandir($dir), array('..', '.'));
 			$found_dirs = array();
-			$found_dirs = array_diff(scandir($dir), array('..', '.'));
-			foreach ($found_dirs as &$value) {
-				$value = $dir . "/" . $value;
+			foreach ($found_files as $value) {
+				$file = $dir . "/" . $value;
+				if(is_dir($file)){
+					array_push($found_dirs,$file);
+				}
 			}
 			if (count($found_dirs)) {
 				$existing_dirs = array_merge($existing_dirs,$found_dirs);
@@ -29,7 +50,6 @@ class data_functions {
 			
 		}
 		return $existing_dirs;
-		
 	}
 	
 	// Returns a list of all directories under the base directory that are not associated with a user in the database.
@@ -39,8 +59,7 @@ class data_functions {
 		$existing_dirs = self::get_existing_dirs();
 		$monitored_dirs = array();
 		foreach ($full_monitored_dirs as $dir) {
-			array_push($monitored_dirs,$dir['data_dir_path']);
-			
+			array_push($monitored_dirs,$dir['archive_directory']);
 		}
 		
 		$unmonitored_dirs = array_diff($existing_dirs,$monitored_dirs);

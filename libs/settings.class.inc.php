@@ -26,6 +26,10 @@ class settings {
         return $server_name;
 	}
 	
+	public static function get_root_data_dirs(){
+		$data_dirs = explode(" ",__ROOT_DATA_DIRS__);
+		return $data_dirs;
+	}
 }
 
 ?>
