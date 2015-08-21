@@ -9,7 +9,7 @@ function __autoload($class_name) {
 }
 
 include_once '../conf/settings.inc.php';
-
+$settings = new settings($db);
 
 $sapi_type = php_sapi_name();
 // If run from command line
@@ -24,7 +24,7 @@ else {
 	$rows = $db->query("select archive_directory,id,username from accounts where is_enabled=1 and archive_directory is not null");
 	$data_usage = new data_usage($db);
 	$arch_file = new archive_file($db);
-	foreach ( $rows as $key=>$row ){		
+	foreach ( $rows as $key=>$row ){
 		// Gather usage info
 		// Total Usage in MB
 		$usage = exec("du -am ".__ARCHIVE_DIR__.$row['archive_directory']);
@@ -39,7 +39,7 @@ else {
 		$numsmallfiles = 0;
 		foreach ( $allfiles as $key=>$file ){
 			preg_match("/^(.*)\\t/u", $file, $matches);
-			if( intval($matches[1]) < __SMALL_FILE_SIZE__ ){
+			if( intval($matches[1]) < $settings->get_setting('small_file_size') ){
 				$numsmallfiles += 1;
 			}
 		}

@@ -76,6 +76,8 @@
 	$user = new user($db,$ldap,$user_id);
 	$usage = data_usage::latestUsage($db,$user_id);
 	$get_array = array("month"=>$month,"year"=>$year,"user_id"=>$user_id);
+	
+	$settings = new settings($db);
 ?>
 	<form class="form-inline" action='<?php echo $_SERVER['PHP_SELF']; ?>' method="get">
 		<?php if ($login_user->is_admin()){
@@ -186,7 +188,7 @@
 		window.onload = function(){
 			var basedir = '<?php echo __ARCHIVE_DIR__.$user->get_archive_directory();?>';
 			var root = {"filename":"<?php echo $user->get_archive_directory();?>","filesize":0,children:[]};
-			var smallfilesize = <?php echo __SMALL_FILE_SIZE__; ?>;
+			var smallfilesize = <?php echo $settings->get_setting('small_file_size'); ?>;
 
 			// Helpers			
 			Array.prototype.findin = function(field,value){

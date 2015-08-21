@@ -19,6 +19,7 @@
 					<li><a href="add_user.php">Add User</a></li>
 					<li><a href="log_transaction.php">Log Transaction</a></li>
 					<li><a href="unwatched_dirs.php">Unmonitored Directories</a></li>
+					<li><a href="settings.php">Settings</a></li>
 						<?php	
 					}
 					?>

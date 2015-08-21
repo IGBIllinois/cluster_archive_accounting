@@ -30,7 +30,6 @@ define("__SESSION_TIMEOUT__",3600);
  
 define("__ARCHIVE_DIR__", "");
 define("__ROOT_DATA_DIRS__", "");
-define("__SMALL_FILE_SIZE__", 1024);
  
 define("__LOG_FILE__","");
 define("__ENABLE_LOG__",false);

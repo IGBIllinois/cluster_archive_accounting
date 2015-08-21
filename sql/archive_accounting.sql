@@ -54,21 +54,25 @@ CREATE TABLE `archive_usage` (
 # Dump of table settings
 # ------------------------------------------------------------
 
+DROP TABLE IF EXISTS `settings`;
+
 CREATE TABLE `settings` (
   `key` varchar(64) NOT NULL DEFAULT '',
   `value` varchar(64) NOT NULL DEFAULT '',
   `description` varchar(128) NOT NULL DEFAULT '',
   `modified` datetime NOT NULL,
+  `name` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 LOCK TABLES `settings` WRITE;
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 
-INSERT INTO `settings` (`key`, `value`, `description`, `modified`)
+INSERT INTO `settings` (`key`, `value`, `description`, `modified`, `name`)
 VALUES
-	('data_cost','150','Cost per TB, rounded up','2015-08-06 16:43:02'),
-	('min_billable_data','51200','Minimum billable data, in MB','2015-08-06 16:43:11');
+	('data_cost','150','Cost per TB, rounded up','2015-08-21 10:48:38','Data Cost'),
+	('min_billable_data','51200','Minimum billable data, in MB','2015-08-06 16:43:11','Min Billable Data'),
+	('small_file_size','1048576','Threshold for \'small\' file, in KB','2015-08-21 10:49:47','Small File Size');
 
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
