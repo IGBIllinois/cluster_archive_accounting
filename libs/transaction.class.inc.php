@@ -37,6 +37,9 @@
 			}
 		}
 		
+		public function get_id(){
+			return $this->transaction_id;
+		}
 		public function get_balance(){
 			return $this->balance;
 		}

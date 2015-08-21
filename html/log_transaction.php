@@ -10,6 +10,7 @@
 		}
 		$trans = new transaction($db);
 		$trans->create($_POST['userid'],$_POST['amount'],null);
+		log::log_message("Transaction ".$trans->get_id()." added to database by user ".$login_user->get_username());
 	}
 
 	$user_list = user_functions::get_users($db);

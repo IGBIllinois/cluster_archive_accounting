@@ -54,6 +54,7 @@ else {
 			// Store file info in database
 			$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 		}
+		log::log_message("Scanned ".$row['archive_directory'].': '.$usage.' MB, '.count($allfiles).' files.');
 	}
 
 }

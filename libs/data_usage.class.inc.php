@@ -25,11 +25,11 @@
 			$existing = $this->db->non_select_query($sql,$args);
 			
 			// Calculate cost
-			$cost = self::dataCost($usage);
+			$cost = self::dataCost($this->db,$usage);
 			
 			// Subtract amount already paid for
 			$latestUsage = data_usage::latestUsage($this->db,$account_id);
-			$paid = $this->dataCost($latestUsage->directory_size);
+			$paid = $this->dataCost($this->db,$latestUsage->directory_size);
 			$cost = max(0,$cost-$paid);
 			
 			// Save info to database
