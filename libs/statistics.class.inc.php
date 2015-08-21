@@ -129,7 +129,7 @@
 			$month_array = array();
 			for ($month=1;$month<=12;$month++){
 				// TODO using the prepared statement correctly here might give us a wee performance boost
-				$sql = "select sum(amount) as balance from transactions where (month(transaction_time)<=:month and year(transaction_time)=year) or year(transaction_time)<:year";
+				$sql = "select sum(amount) as balance from transactions where ((month(transaction_time)<=:month and year(transaction_time)=:year) or year(transaction_time)<:year)";
 				$args = array(':month'=>$month,':year'=>$year);
 				if($user_id!=0){
 					$sql .= " and account_id=:userid";
