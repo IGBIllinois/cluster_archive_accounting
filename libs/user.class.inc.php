@@ -8,6 +8,7 @@ class user {
 	private $user_name;
 	private $full_name;
 	private $archive_directory;
+	private $has_directory;
 	private $enabled;
 	private $time_created;
 	private $ldap;
@@ -31,29 +32,33 @@ class user {
 	}
 	
 	// Inserts a user into the database with the given values, then loads that user into this object. Displays errors if there are any.
-	public function create($username,$admin,$archive_dir,$cfop) {
+	public function create($username,$admin,$hasdir,$archive_dir,$cfop) {
 		$username = trim(rtrim($username));
 		
 
 		$error = false;
+		$message = "";
 		//Verify Username
 		if ($username == "") {
 			$error = true;
-			$message = "<div class='alert'>Please enter a username.</div>";
+			$message = "<div class='alert alert-danger'>Please enter a username.</div>";
 		}
 		elseif ($this->get_user_exist($username)) {
 			$error = true;
-			$message .= "<div class='alert'>User already exists in database.</div>";
+			$message .= "<div class='alert alert-danger'>User already exists in database.</div>";
 		}
 		elseif (!$this->ldap->is_ldap_user($username)) {
 			$error = true;
-			$message = "<div class='alert'>User does not exist in LDAP database.</div>";
+			$message = "<div class='alert alert-danger'>User does not exist in LDAP database.</div>";
 		}
 		
-		// Check if archive dir is already there
-		if ($this->data_dir_exists($archive_dir)) {
+		// Check if archive dir is already there'
+		if ($hasdir && $archive_dir == ""){
 			$error = true;
-			$message .= "<div class='alert'>Directory " . $archive_dir . " is already in the database</div>";
+			$message .= "<div class='alert alert-danger'>Please enter a directory.</div>";
+		} else if ($hasdir && $this->data_dir_exists($archive_dir)) {
+			$error = true;
+			$message .= "<div class='alert alert-danger'>Directory " . $archive_dir . " is already in the database</div>";
 		}
 
 		//If Errors, return with error messages
@@ -62,17 +67,24 @@ class user {
 					'MESSAGE'=>$message);
 		}
 
-		//Everything looks good, add user and default user project
+		//Everything looks good, add user
 		else {
 		
 			if ($this->is_disabled($username)) {
 				$this->load_by_username($username);
-				$this->enable();		
+				$this->enable();
+				$this->set_admin($admin);
+				$this->set_has_directory($hasdir);
+				if($this->has_directory()){
+					$this->set_archive_directory($archive_dir);
+					$this->set_cfop($cfop);
+				}
+				$user_id = $this->id;	
 			}
 			else {
 				$full_name = $this->ldap->get_ldap_full_name($username);
-				$sql = "insert into accounts (`username`,`name`,`is_admin`,`is_enabled`,`archive_directory`,`cfop`,`time_created`) values (:username,:fullname,:admin,1,:archivedir,:cfop,NOW())";
-				$args = array(':username'=>$username,':fullname'=>$full_name,':admin'=>$admin,':archivedir'=>$archive_dir,':cfop'=>$cfop);
+				$sql = "insert into accounts (`username`,`name`,`is_admin`,`is_enabled`,`archive_directory`,`cfop`,`time_created`,`has_directory`) values (:username,:fullname,:admin,1,:archivedir,:cfop,NOW(),:hasdir)";
+				$args = array(':username'=>$username,':fullname'=>$full_name,':admin'=>$admin,':archivedir'=>$archive_dir,':cfop'=>$cfop,':hasdir'=>$hasdir);
 				$user_id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($user_id);
 			}
@@ -134,7 +146,6 @@ class user {
         $sql .= "order by usage_time";
         $args = array(':id'=>$this->get_user_id(),':year'=>$year,':month'=>$month,':prevyear'=>$prevyear,':prevmonth'=>$prevmonth);
 		return $this->db->query($sql,$args);
-		
 	}
 	
 	// Checks to see if the given directory is already associated with any user
@@ -165,20 +176,17 @@ class user {
 		$message;
 		$error = false;
 		
-		$sql = "UPDATE users SET user_enabled='0' WHERE user_id=:id LIMIT 1";
+		$sql = "update accounts set is_enabled='0' where id=:id limit 1";
 		$args = array(':id'=>$this->get_user_id());
 		$this->enabled = false;
 		$this->db->non_select_query($sql,$args);
-		$this->default_project()->disable();
-		$this->default_data_dir()->disable();
 		
 		$message = "User successfully deleted";
 		return array('RESULT'=>true,'MESSAGE'=>$message);
-
 	}
 
 	public function has_directory(){
-		return ($this->archive_directory != NULL);
+		return $this->has_directory;
 	}
 
 	public function is_admin() {
@@ -197,6 +205,15 @@ class user {
 		$result = $this->db->non_select_query($sql,$args);
 		if ($result) {
 			$this->admin = $admin;
+		}
+		return $result;
+	}
+	public function set_has_directory($hasdir){
+		$sql = "update accounts set has_directory=:hasdir where id=:id limit 1";
+		$args = array(':hasdir'=>$hasdir,':id'=>$this->get_user_id());
+		$result = $this->db->non_select_query($sql,$args);
+		if($result){
+			$this->has_directory = $hasdir;
 		}
 		return $result;
 	}
@@ -260,7 +277,7 @@ class user {
 	}
 	private function get_user() {
 
-		$sql = "SELECT name, username, archive_directory, is_admin, is_enabled, time_created, cfop ";
+		$sql = "SELECT name, username, archive_directory, is_admin, is_enabled, time_created, cfop, has_directory ";
 		$sql .= "FROM accounts ";
 		$sql .= "WHERE accounts.id=:id ";
 		$sql .= "LIMIT 1";
@@ -273,6 +290,7 @@ class user {
 			$this->cfop = $result[0]['cfop'];
 			$this->time_created = $result[0]['time_created'];
 			$this->enabled = $result[0]['is_enabled'];
+			$this->has_directory = $result[0]['has_directory'];
 			$this->email = $this->ldap->get_email($this->get_username());
 			$this->archive_directory = $result[0]['archive_directory'];
 		}
@@ -299,11 +317,10 @@ class user {
     }
 
 	private function is_disabled($username) {
-		$sql = "SELECT count(1) as count FROM accounts WHERE username=:username ";
-		$sql .= "AND is_enabled='0' LIMIT 1";
+		$sql = "select count(id) as count from accounts where username=:username and is_enabled=0 limit 1";
 		$args = array(':username'=>$username);
 		$result = $this->db->query($sql,$args);
-		if ($result['count']) {
+		if ($result[0]['count'] == 1) {
 			return true;
 		}
 		return false;

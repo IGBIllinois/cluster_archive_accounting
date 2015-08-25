@@ -21,7 +21,7 @@ else {
 	$db = new db(__MYSQL_HOST__,__MYSQL_DATABASE__,__MYSQL_USER__,__MYSQL_PASSWORD__);
 
 	// Get archive directories from database
-	$rows = $db->query("select archive_directory,id,username from accounts where is_enabled=1 and archive_directory is not null");
+	$rows = $db->query("select archive_directory,id,username from accounts where is_enabled=1 and has_directory=1 and archive_directory is not null and archive_directory!=''");
 	$data_usage = new data_usage($db);
 	$arch_file = new archive_file($db);
 	foreach ( $rows as $key=>$row ){

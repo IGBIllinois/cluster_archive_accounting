@@ -59,7 +59,7 @@
 	//list of users to select from
 	$user_list = array();
 	if ($login_user->is_admin()) {
-	    $user_list = user_functions::get_users($db);
+	    $user_list = user_functions::get_graph_users($db);
 	}
 	$user_list_html = "";
 	if (count($user_list)) {

@@ -66,6 +66,7 @@ class db {
 
 	//insert_query()
 	//$sql - sql string to run on the database
+	//$args - array of arguments to insert into sql string
 	//returns the id number of the new record, 0 if it fails
 	public function insert_query($sql,$args=[]) {
 		$result = $this->link->prepare($sql);
@@ -74,7 +75,6 @@ class db {
 			log::log_message("INSERT ERROR: " . $sql,false);
 		}
 		return $this->link->lastInsertId();
-
 	}
 
 	//build_insert()

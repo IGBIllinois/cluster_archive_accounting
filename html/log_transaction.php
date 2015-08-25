@@ -13,7 +13,7 @@
 		log::log_message("Transaction ".$trans->get_id()." added to database by user ".$login_user->get_username());
 	}
 
-	$user_list = user_functions::get_users($db);
+	$user_list = user_functions::get_graph_users($db);
 	$userselect = "<select class='form-control' name='userid'>";
 	foreach($user_list as $row){
 		if( (isset($_GET['user_id']) && $row['id'] == $_GET['user_id']) || (isset($_POST['user_id']) && $row['id'] == $_POST['user_id']) ){

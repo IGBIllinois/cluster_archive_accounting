@@ -40,6 +40,16 @@
 			?>
 			</td>
 		</tr>
+		<tr>
+			<td>Has directory:</td>
+			<td><?php if ($user->has_directory()){
+				echo '<span class="glyphicon glyphicon-ok"></span>';
+			} else {
+				echo '<span class="glyphicon glyphicon-remove"></span>';
+			}
+			?>
+			</td>
+		</tr>
 		<?php if ($user->has_directory()){ 
 			$usage = data_usage::latestUsage($db,$user->get_user_id());
 			$balance = transaction::latestTransaction($db,$user->get_user_id());

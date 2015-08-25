@@ -53,6 +53,13 @@ class user_functions {
         }
     	return $result;
 	}
+	
+	public static function get_graph_users($db){
+		$sql = "select * from accounts where is_enabled=1 and has_directory = 1 order by username asc";
+		$args = array();
+		$result = $db->query($sql,$args);
+		return $result;
+	}
 
 	// Returns number of enabled users
 	public static function get_num_users($db) {

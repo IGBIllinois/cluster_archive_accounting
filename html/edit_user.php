@@ -18,9 +18,15 @@
 		if ( isset($_POST['is_admin']) ){
 			$admin = 1;
 		}
+		$hasdir = 0;
+		if ( isset($_POST['has_dir']) ){
+			$hasdir = 1;
+		}
 		
-		$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
-		if($cfop=="---")$cfop="";
+		if($hasdir == 1){
+			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
+			if($cfop=="---")$cfop="";
+		}
 		
 		$user = new user($db,$ldap,$_POST['user_id']);
 		if ( $user->is_admin() != $admin ){
@@ -28,14 +34,21 @@
 				$message = "<div class='alert alert-success'>User Administrator successfully set</div>";
 			}
 		}
-		if ( $user->get_archive_directory() != $_POST['archive_dir'] ){
-			if ($user->set_archive_directory($_POST['archive_dir'])){
-				$message .= "<div class='alert alert-success'>User Archive Directory successfully set</div>";
+		if ( $user->has_directory() != ($hasdir==1) ){
+			if ($user->set_has_directory($hasdir)){
+				$message = "<div class='alert alert-success'>User Has Directory successfully set</div>";
 			}
 		}
-		if ( $user->get_cfop() != $cfop ){
-			if ($user->set_cfop($cfop)){
-				$message .= "<div class='alert alert-success'>User CFOP successfully set</div>";
+		if ( $user->has_directory() ){
+			if ( $user->get_archive_directory() != $_POST['archive_dir'] ){
+				if ($user->set_archive_directory($_POST['archive_dir'])){
+					$message .= "<div class='alert alert-success'>User Archive Directory successfully set</div>";
+				}
+			}
+			if ( $user->get_cfop() != $cfop ){
+				if ($user->set_cfop($cfop)){
+					$message .= "<div class='alert alert-success'>User CFOP successfully set</div>";
+				}
 			}
 		}
 	}
@@ -47,7 +60,7 @@
 	}
 	else if ( isset($_POST['cancel_user']) ){
 		unset($_POST);
-		header('Location:user.php'.$_POST['user-id']);
+		header('Location:user.php?user_id='.$user_id);
 	}
 	
 	require_once 'includes/header.inc.php';
@@ -72,11 +85,19 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-2 control-label" for="hasdir-input">Has Directory:</label>
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label><input type="checkbox" name="has_dir" id="hasdir-input" <?php if($user->has_directory()){echo 'checked="checked"';}?>/></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="col-sm-2 control-label" for="archive-dir-input">Archive Directory:</label>
 			<div class="col-sm-4">
 				<div class="input-group">
 					<span class="input-group-addon"><?php echo __ARCHIVE_DIR__;?></span>
-					<input class="form-control" type="text" name="archive_dir" id="archive-dir-input" value="<?php echo $user->get_archive_directory();?>" />
+					<input class="form-control" type="text" name="archive_dir" id="archive-dir-input" value="<?php echo $user->get_archive_directory();?>" <?php if(!$user->has_directory()){echo 'disabled';}?>/>
 				</div>
 			</div>
 		</div>
@@ -84,22 +105,27 @@
 			<label class="col-sm-2 control-label">CFOP:</label>
 			<div class="col-sm-4">
 				<div class="row">
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php echo $user->get_cfop_college();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php echo $user->get_cfop_fund();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php echo $user->get_cfop_organization();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php echo $user->get_cfop_program();?>"/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php echo $user->get_cfop_college();?>" <?php if(!$user->has_directory()){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php echo $user->get_cfop_fund();?>" <?php if(!$user->has_directory()){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php echo $user->get_cfop_organization();?>" <?php if(!$user->has_directory()){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php echo $user->get_cfop_program();?>" <?php if(!$user->has_directory()){echo 'disabled';}?>/></div>
 				</div>
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="col-sm-4 col-sm-offset-2">
-				<input class="btn btn-primary" type="submit" name="edit_user" value="Update User" />
-				<input class="btn btn-danger" type="submit" name="delete_user" value="Delete User" onClick='return (confirm_disable_user());' />
-				<input class='btn btn-default' type='submit' name='cancel_user' value='Cancel'>
+				<div class="btn-group">
+					<input class="btn btn-primary" type="submit" name="edit_user" value="Update User" />
+					<input class="btn btn-danger" type="submit" name="delete_user" value="Delete User" onClick='return (confirm_disable_user());' />
+					<input class='btn btn-default' type='submit' name='cancel_user' value='Cancel'>
+				</div>
 			</div>
 		</div>
 	</fieldset>
 </form>
+<script type="text/javascript">
+	$('#hasdir-input').on("click",directory_toggle);
+</script>
 
 <?php
 	if (isset($message)) { echo $message; }
