@@ -15,6 +15,7 @@ CREATE TABLE `accounts` (
   `is_enabled` int(11) NOT NULL DEFAULT '0',
   `time_created` datetime NOT NULL,
   `cfop` varchar(32) DEFAULT NULL,
+  `has_directory` int(11) DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
