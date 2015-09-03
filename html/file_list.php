@@ -9,11 +9,11 @@
 	if (isset($_GET['month'])) {
 		$month = $_GET['month'];
 	}
-	if (isset($_GET['user_id']) && is_numeric($_GET['user_id'])) {
-		$user_id = $_GET['user_id'];
+	if (isset($_GET['directory_id']) && is_numeric($_GET['directory_id'])) {
+		$directory_id = $_GET['directory_id'];
 	} else {
 		exit;
 	}
 	
-	$filelist = archive_file::get_file_list($db,$month,$year,$user_id);
+	$filelist = archive_file::get_file_list($db,$month,$year,$directory_id);
 	echo json_encode($filelist);

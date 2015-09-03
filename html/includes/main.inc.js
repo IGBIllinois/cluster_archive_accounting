@@ -2,6 +2,10 @@ function confirm_disable_user() {
 	return confirm("Are you sure you wish to delete this user?");
 }
 
+function confirm_disable_directory(){
+	return confirm("Are you sure you wish to delete this directory?");
+}
+
 function cfop_advance(num){
 	var inputname = "cfop_"+num;
 	var nextinput = "cfop_"+(num+1);

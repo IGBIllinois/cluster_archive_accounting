@@ -37,9 +37,9 @@
 		}
 		
 		// Returns a list of all file info for a given month and user
-		public static function get_file_list($db,$month,$year,$user_id){
-			$sql = "select f.* from archive_files f left join archive_usage u on u.id=f.usage_id where month(u.usage_time)=:month and year(u.usage_time)=:year and u.account_id = :id";
-			$args = array(':month'=>$month,':year'=>$year,':id'=>$user_id);
+		public static function get_file_list($db,$month,$year,$directory_id){
+			$sql = "select f.* from archive_files f left join archive_usage u on u.id=f.usage_id where month(u.usage_time)=:month and year(u.usage_time)=:year and u.directory_id = :id";
+			$args = array(':month'=>$month,':year'=>$year,':id'=>$directory_id);
 			$result = $db->query($sql,$args);
 			return $result;
 		}

@@ -14,28 +14,38 @@
 		if (isset($_POST['is_admin'])){
 			$admin = 1;
 		}
+
 		$hasdir = 0;
 		if (isset($_POST['has_dir'])){
 			$hasdir = 1;
 		}
-		
 		$cfop = "";
 		if($hasdir==1){
 			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
 			if($cfop=="---")$cfop="";
-		}
-		$archive_dir = "";
-		if(isset($_POST['archive_dir'])){
-			$archive_dir = $_POST['archive_dir'];
+			$archive_dir = "";
+			if(isset($_POST['archive_dir']) && $_POST['archive_dir']!=""){
+				$archive_dir = $_POST['archive_dir'];
+			} else {
+				$message = "<div class='alert alert-danger'>Please enter a directory</div>";
+			}
 		}
 		
-		$user = new user($db,$ldap);
-		$result = $user->create($_POST['new_username'],$admin,$hasdir,$archive_dir,$cfop);
 		
-		if($result['RESULT'] == true){
-			header("Location: user.php?user_id=".$result['user_id']);
-		} else if ($result['RESULT'] == false) {
-			$message = $result['MESSAGE'];
+		if($message == ""){
+			$user = new user($db,$ldap);
+			$result = $user->create($_POST['new_username'],$admin);
+		
+			if($result['RESULT'] == true){
+				// Add directory if needed
+				if($hasdir==1){
+					$directory = new archive_directory($db);
+					$directory->create($result['user_id'],$archive_dir,$cfop);
+				}
+				header("Location: user.php?user_id=".$result['user_id']);
+			} else if ($result['RESULT'] == false) {
+				$message = $result['MESSAGE'];
+			}
 		}
 	} else if (isset($_POST['cancel_user'])) {
 		unset($_POST);
@@ -88,7 +98,9 @@
 		</div>
 		<div class="form-group">
 			<div class="col-sm-4 col-sm-offset-2">
-				<input class="btn btn-primary" type="submit" name="add_user" value="Add user" /> <input class="btn btn-default" type="submit" name="cancel_user" value="Cancel" />
+				<div class="btn-group">
+					<input class="btn btn-primary" type="submit" name="add_user" value="Add user" /> <input class="btn btn-default" type="submit" name="cancel_user" value="Cancel" />
+				</div>
 			</div>
 		</div>
 	</fieldset>

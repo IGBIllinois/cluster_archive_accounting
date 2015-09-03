@@ -8,9 +8,9 @@ class user_functions {
     	$search = strtolower(trim(rtrim($search)));
         $where_sql = array();
 
-    	$sql = "SELECT * FROM accounts ";
-    	$args = array();
-        array_push($where_sql,"is_enabled='1'");
+    	$sql = "SELECT users.*, group_concat(concat(:basedir,directory) separator ', ') as `directory` FROM users left join directories on directories.user_id=users.id ";
+    	$args = array(':basedir'=>__ARCHIVE_DIR__);
+        array_push($where_sql,"users.is_enabled='1' and directories.is_enabled=1");
 
     	if ($search != "" ) {
         	$terms = explode(" ",$search);
@@ -36,7 +36,7 @@ class user_functions {
             	}
 
         }
-    	$sql .= " ORDER BY username ASC ";
+    	$sql .= " group by username ORDER BY username ASC ";
     	$result = $db->query($sql,$args);
 
         if ($ldap != "") {
@@ -55,9 +55,15 @@ class user_functions {
 	}
 	
 	public static function get_graph_users($db){
-		$sql = "select * from accounts where is_enabled=1 and has_directory = 1 order by username asc";
+		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 order by username asc";
 		$args = array();
 		$result = $db->query($sql,$args);
+		return $result;
+	}
+	
+	public static function get_all_users($db){
+		$sql = "select users.* from users where is_enabled=1 order by username";
+		$result = $db->query($sql);
 		return $result;
 	}
 

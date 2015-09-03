@@ -29,29 +29,17 @@
 	//list of users to select from
 	$user_list = array();
 	if ($login_user->is_admin()) {
-		$user_list = user_functions::get_graph_users($db);
+		$user_list = user_functions::get_all_users($db);
 	}
 	$user_list_html = "";
 	if (count($user_list)) {
 		$user_list_html = "<div class='form-group'><label>User: </label> <select class='form-control input-sm' name='user_id'>";
-		if ((!isset($_GET['user_id'])) || ($_GET['user_id'] == $login_user->get_user_id())) {
-	                $user_list_html .= "<option value='" . $login_user->get_user_id(). "' selected='selected'>";
-	                $user_list_html .= $login_user->get_username() . "</option>";
-	        }
-	        else {
-	                $user_list_html .= "<option value='" . $login_user->get_user_id() . "'>";
-	                $user_list_html .= $login_user->get_username() . "</option>";
-	        }
-	
 		foreach ($user_list as $user) {
-	
 			if ($user['id'] == $user_id) {
 				$user_list_html .= "<option value='" . $user['id'] . "' selected='true'>" . $user['username'] . "</option>";
-			}
-			else {
+			} else {
 				$user_list_html .= "<option value='" . $user['id'] . "'>" . $user['username'] . "</option>";
 			}
-	
 		}
 		$user_list_html .= "</select></div>";
 	}
@@ -84,12 +72,15 @@
 	$data_usage = $user->get_data_summary($month,$year);
 	$data_html = "";
 	foreach($data_usage as $value){
-		$data_html .= "<tr>";
-		$data_html .= "<td>".__ARCHIVE_DIR__.$user->get_archive_directory()."</td>";
-		$data_html .= "<td>".$value['terabytes']." TB</td>";
-		$data_html .= "<td>".$value['prevusage']." TB</td>";
-		$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
-		$data_html .= "</tr>";
+		if($value['terabytes']!=null){
+			$data_html .= "<tr>";
+			$data_html .= "<td>".__ARCHIVE_DIR__.$value['directory']."</td>";
+			$data_html .= "<td>".$value['terabytes']." TB</td>";
+			$data_html .= "<td>".$value['prevusage']." TB</td>";
+			$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
+			$data_html .= "<td>".$value['cfop']."</td>";
+			$data_html .= "</tr>";
+		}
 	}
 	?>
 	<form class="form-inline" action='<?php echo $_SERVER['PHP_SELF']; ?>' method="get">
@@ -112,15 +103,11 @@
 	
 		<tr>
 			<td>Name:</td>
-			<td><?php echo $user->get_full_name(); ?></td>
+			<td><?php echo $user->get_name(); ?></td>
 		</tr>
 		<tr>
 			<td>Username:</td>
 			<td><?php echo $user->get_username(); ?></td>
-		</tr>
-		<tr>
-			<td>CFOP:</td>
-			<td><?php echo $user->get_cfop(); ?></td>
 		</tr>
 		<tr>
 			<td>Billing Dates:</td>
@@ -136,6 +123,7 @@
 				<th>Usage</th>
 				<th>Previous Usage</th>
 				<th>Cost</th>
+				<th>CFOP</th>
 			</tr>
 		</thead>
 		<?php echo $data_html; ?>

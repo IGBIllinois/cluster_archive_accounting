@@ -5,18 +5,18 @@ class data_functions {
 	// Returns billing info for all users for the given month and year. Column names are human-readable for output directly to a spreadsheet
 	public static function get_data_bill($db,$month,$year) {
 		// This SQL statement uses column aliases as they'll be fed directly into a spreadsheet in some cases
-		$sql = "SELECT accounts.username as Username, accounts.archive_directory as Directory, ROUND(archive_usage.directory_size / 1048576,3) as Usage, archive_usage.cost as Cost, (select sum(transactions.amount) from transactions where transactions.account_id=accounts.id and ((month(transaction_time)<=:month and year(transaction_time)=year) or year(transaction_time)<:year)) as Balance, accounts.cfop as CFOP FROM archive_usage LEFT JOIN accounts ON archive_usage.account_id=accounts.id WHERE YEAR(archive_usage.usage_time)=:year AND MONTH(archive_usage.usage_time)=:month group by accounts.id ORDER BY Directory ASC";
+		$sql = "SELECT users.username as Username, directories.directory as Directory, ROUND(archive_usage.directory_size / 1048576,3) as `Usage`, archive_usage.cost as Cost, (select sum(transactions.amount) from transactions where transactions.directory_id=directories.id and ((month(transaction_time)<=:month and year(transaction_time)=:year) or year(transaction_time)<:year)) as Balance, directories.cfop as CFOP FROM archive_usage LEFT JOIN directories on archive_usage.directory_id=directories.id LEFT JOIN users ON directories.user_id=users.id WHERE YEAR(archive_usage.usage_time)=:year AND MONTH(archive_usage.usage_time)=:month group by users.id ORDER BY Directory ASC";
 		$args = array(':year'=>$year,':month'=>$month);
     	return $db->query($sql,$args);
 	}
 
 	// Returns a list of all directories (absolute paths!) in the database
 	public static function get_all_directories($db) {
-		$sql = "select archive_directory from accounts where is_enabled=1 and archive_directory!='' and archive_directory is not null order by archive_directory asc";
+		$sql = "select directory from directories left join users on users.id=directories.user_id where directories.is_enabled=1 and users.is_enabled=1 order by directory asc";
         $result = $db->query($sql);
         for ($i=0;$i<count($result);$i++) {
-	        $result[$i]['archive_directory'] = __ARCHIVE_DIR__.$result[$i]['archive_directory'];
-		    if (is_dir($result[$i]['archive_directory'])) {
+	        $result[$i]['directory'] = __ARCHIVE_DIR__.$result[$i]['directory'];
+		    if (is_dir($result[$i]['directory'])) {
 		        $result[$i]['dir_exists'] = true;
 		    }
 		    else {
@@ -60,7 +60,7 @@ class data_functions {
 		$existing_dirs = self::get_existing_dirs();
 		$monitored_dirs = array();
 		foreach ($full_monitored_dirs as $dir) {
-			array_push($monitored_dirs,$dir['archive_directory']);
+			array_push($monitored_dirs,$dir['directory']);
 		}
 		
 		$unmonitored_dirs = array_diff($existing_dirs,$monitored_dirs);

@@ -3,26 +3,10 @@ CREATE DATABASE archive_accounting
   CHARACTER SET utf8;
 USE archive_accounting;
 
-# Dump of table accounts
-# ------------------------------------------------------------
-
-CREATE TABLE `accounts` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) NOT NULL DEFAULT '',
-  `username` varchar(64) NOT NULL DEFAULT '',
-  `archive_directory` varchar(128) DEFAULT '',
-  `is_admin` int(11) NOT NULL DEFAULT '0',
-  `is_enabled` int(11) NOT NULL DEFAULT '0',
-  `time_created` datetime NOT NULL,
-  `cfop` varchar(32) DEFAULT NULL,
-  `has_directory` int(11) DEFAULT '1',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
-
 # Dump of table archive_files
 # ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `archive_files`;
 
 CREATE TABLE `archive_files` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -40,13 +24,32 @@ CREATE TABLE `archive_files` (
 # Dump of table archive_usage
 # ------------------------------------------------------------
 
+DROP TABLE IF EXISTS `archive_usage`;
+
 CREATE TABLE `archive_usage` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) unsigned NOT NULL,
+  `directory_id` int(11) unsigned NOT NULL,
   `directory_size` int(11) NOT NULL COMMENT 'directory size in MB',
   `num_small_files` int(11) NOT NULL,
   `usage_time` datetime NOT NULL,
   `cost` varchar(16) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
+# Dump of table directories
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `directories`;
+
+CREATE TABLE `directories` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `directory` varchar(256) NOT NULL DEFAULT '',
+  `time_created` datetime NOT NULL,
+  `cfop` varchar(64) DEFAULT NULL,
+  `is_enabled` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -82,9 +85,11 @@ UNLOCK TABLES;
 # Dump of table transactions
 # ------------------------------------------------------------
 
+DROP TABLE IF EXISTS `transactions`;
+
 CREATE TABLE `transactions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) unsigned NOT NULL,
+  `directory_id` int(11) unsigned NOT NULL,
   `amount` int(11) NOT NULL,
   `usage_id` int(11) unsigned DEFAULT NULL,
   `transaction_time` datetime NOT NULL,
@@ -93,3 +98,19 @@ CREATE TABLE `transactions` (
   CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`usage_id`) REFERENCES `archive_usage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
+
+# Dump of table users
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NOT NULL DEFAULT '',
+  `username` varchar(64) NOT NULL DEFAULT '',
+  `is_admin` int(11) NOT NULL DEFAULT '0',
+  `is_enabled` int(11) NOT NULL DEFAULT '0',
+  `time_created` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

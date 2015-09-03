@@ -1,10 +1,13 @@
 <?php
 	require_once 'includes/header.inc.php';
 	
-	$user_id = $login_user->get_user_id();
-	if(isset($_GET['user_id']) && is_numeric($_GET['user_id'])){
-		$user_id = $_GET['user_id'];
+	$directory_id = $login_user->get_directories()[0]->get_id();
+	if(isset($_GET['directory_id']) && is_numeric($_GET['directory_id'])){
+		$directory_id = $_GET['directory_id'];
 	}
+	$directory = new archive_directory($db);
+	$directory->load_by_id($directory_id);
+	$user_id = $directory->get_user_id();
 	if(!$login_user->permission($user_id)){
 		echo "Invalid Permissions";
 		exit;
@@ -27,25 +30,13 @@
 	}
 	$user_list_html = "";
 	if (count($user_list)) {
-		$user_list_html = "<div class='form-group'><label>User: </label> <select class='form-control input-sm' name='user_id'>";
-		if ((!isset($_GET['user_id'])) || ($_GET['user_id'] == $login_user->get_user_id())) {
-	                $user_list_html .= "<option value='" . $login_user->get_user_id(). "' selected='selected'>";
-	                $user_list_html .= $login_user->get_username() . "</option>";
-	        }
-	        else {
-	                $user_list_html .= "<option value='" . $login_user->get_user_id() . "'>";
-	                $user_list_html .= $login_user->get_username() . "</option>";
-	        }
-	
+		$user_list_html = "<div class='form-group'><label>Directory: </label> <select class='form-control input-sm' name='directory_id'>";
 		foreach ($user_list as $user) {
-	
-			if ($user['id'] == $user_id) {
-				$user_list_html .= "<option value='" . $user['id'] . "' selected='true'>" . $user['username'] . "</option>";
+			if ($user['dir_id'] == $directory_id) {
+				$user_list_html .= "<option value='" . $user['dir_id'] . "' selected='true'>" . $user['username'] ." - ".__ARCHIVE_DIR__.$user['directory'] . "</option>";
+			} else {
+				$user_list_html .= "<option value='" . $user['dir_id'] . "'>" . $user['username'] ." - ".__ARCHIVE_DIR__.$user['directory'] . "</option>";
 			}
-			else {
-				$user_list_html .= "<option value='" . $user['id'] . "'>" . $user['username'] . "</option>";
-			}
-	
 		}
 		$user_list_html .= "</select></div>";
 	}
@@ -74,11 +65,12 @@
 	$month_html .= "</select>";
 	
 	$user = new user($db,$ldap,$user_id);
-	$usage = data_usage::latestUsage($db,$user_id);
-	$get_array = array("month"=>$month,"year"=>$year,"user_id"=>$user_id);
-	
+	$usage = data_usage::latestUsage($db,$directory_id);
+	$get_array = array("month"=>$month,"year"=>$year,"directory_id"=>$directory_id);
+
 	$settings = new settings($db);
 ?>
+	<h4>User File List - <?php echo $month_name . " " . $year; ?></h4>
 	<form class="form-inline" action='<?php echo $_SERVER['PHP_SELF']; ?>' method="get">
 		<?php if ($login_user->is_admin()){
 			echo $user_list_html;
@@ -93,12 +85,11 @@
 		</div>
 		<input class="btn btn-primary btn-sm" type="submit" value="Get File List" />
 	</form>
-	<h4>User File List - <?php echo $month_name . " " . $year; ?></h4>
 	<table class='table table-condensed table-striped table-bordered'>
 	
 		<tr>
 			<td>Name:</td>
-			<td><?php echo $user->get_full_name(); ?></td>
+			<td><?php echo $user->get_name(); ?></td>
 		</tr>
 		<tr>
 			<td>Username:</td>
@@ -106,7 +97,7 @@
 		</tr>
 		<tr>
 			<td>Directory:</td>
-			<td><?php echo __ARCHIVE_DIR__.$user->get_archive_directory(); ?></td>
+			<td><?php echo __ARCHIVE_DIR__.$directory->get_directory(); ?></td>
 		</tr>
 		<tr>
 			<td>Usage:</td>
@@ -186,8 +177,8 @@
 	</div>
 	<script type="text/javascript">
 		window.onload = function(){
-			var basedir = '<?php echo __ARCHIVE_DIR__.$user->get_archive_directory();?>';
-			var root = {"filename":"<?php echo $user->get_archive_directory();?>","filesize":0,children:[]};
+			var basedir = '<?php echo __ARCHIVE_DIR__.$directory->get_directory();?>';
+			var root = {"filename":"<?php echo $directory->get_directory();?>","filesize":0,children:[]};
 			var smallfilesize = <?php echo $settings->get_setting('small_file_size'); ?>;
 
 			// Helpers			
@@ -276,6 +267,7 @@
 			
 			// Initializer
 			function displayFileList(jsonData){
+				console.log(jsonData);
 				for(var i=0; i<jsonData.length; i++){
 					addFile(jsonData[i]);
 				}
@@ -306,7 +298,7 @@
 				dataType: "json",
 				success: displayFileList,
 				error: function(jsonData){
-					$('.file-list').html(jsonData.responseText);
+					$('.filelist').html(jsonData.responseText);
 				}
 			});
 		};

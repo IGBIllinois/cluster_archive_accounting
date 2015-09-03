@@ -11,24 +11,27 @@
 	$graph_type_array[4]['title'] = 'Balance per Month';
 	
 	// Default graph settings
-	$user_id = $login_user->get_user_id();
+	$directory_id = $login_user->get_directories()[0]->get_id();
 	$year = date('Y');
 	$graph_type = $graph_type_array[0]['type'];
 	if(isset($_POST['get_job_graph'])){
 		$year = $_POST['year'];
-		$user_id = $_POST['user_id'];
+		$directory_id = $_POST['directory_id'];
 		$graph_type = $_POST['graph_type'];
 	}
 	
-	if (!$login_user->permission($user_id)) {
-        echo "<div class='alert alert-error'>Iinvalid Permissions</div>";
+	$directory = new archive_directory($db);
+	$directory->load_by_id($directory_id);
+	
+	if (!$login_user->permission($directory->get_id())) {
+        echo "<div class='alert alert-error'>Invalid Permissions</div>";
         exit;
 	}
 	
 	$start_date = $year . "0101";
 	$end_date = $year . "1231";
 	
-	$get_array = array('year'=>$year,'graph_type'=>$graph_type,'user_id'=>$user_id);
+	$get_array = array('year'=>$year,'graph_type'=>$graph_type,'directory_id'=>$directory_id);
 	$graph_image = "<img src='graph.php?" . http_build_query($get_array) . "'>";
 	
 	$graph_form = "<select name='graph_type' class='form-control input-sm'>";
@@ -63,7 +66,8 @@
 	}
 	$user_list_html = "";
 	if (count($user_list)) {
-        $user_list_html = "<div class='form-group'><label class='inline'>Username:</label> <select class='form-control input-sm' name='user_id'>";
+        $user_list_html = "<div class='form-group'><label class='inline'>Directory:</label> <select class='form-control input-sm' name='directory_id'>";
+/*
         if ((!isset($_GET['user_id'])) || ($_GET['user_id'] == $login_user->get_user_id())) {
             $user_list_html .= "<option value='" . $login_user->get_user_id(). "' selected='selected'>";
             $user_list_html .= $login_user->get_username() . "</option>";
@@ -72,13 +76,14 @@
             $user_list_html .= "<option value='" . $login_user->get_user_id() . "'>";
             $user_list_html .= $login_user->get_username() . "</option>";
         }
+*/
 
         foreach ($user_list as $user) {
-            if ($user['id'] == $user_id) {
-                $user_list_html .= "<option value='" . $user['id'] . "' selected='true'>" . $user['username'] . "</option>";
+            if ($user['dir_id'] == $directory_id) {
+                $user_list_html .= "<option value='" . $user['dir_id'] . "' selected='true'>" . $user['username'] ." - ".__ARCHIVE_DIR__.$user['directory'] . "</option>";
             }
             else {
-                $user_list_html .= "<option value='" . $user['id'] . "'>" . $user['username'] . "</option>";
+                $user_list_html .= "<option value='" . $user['dir_id'] . "'>" . $user['username'] ." - ".__ARCHIVE_DIR__.$user['directory'] . "</option>";
             }
         }
         $user_list_html .= "</select></div>";

@@ -19,6 +19,9 @@
 	if (isset($_GET['user_id']) && is_numeric($_GET['user_id'])) {
 		$user_id = $_GET['user_id'];
 	}
+	if(isset($_GET['directory_id']) && is_numeric($_GET['directory_id'])){
+		$directory_id = $_GET['directory_id'];
+	}
 	
 	$graph_type = "";
 	if (isset($_GET['graph_type'])) {
@@ -27,7 +30,7 @@
 	
 	if($graph_type=='user_usage_per_month'){
 		$stats = new statistics($db);
-		$data = $stats->get_usage_per_month($year,$user_id);
+		$data = $stats->get_usage_per_month($year,$directory_id);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Month","type"=>"string"),array("label"=>"Usage (TB)","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -43,7 +46,7 @@
 	}
 	else if ($graph_type == 'user_delta_usage_per_month'){
 		$stats = new statistics($db);
-		$data = $stats->get_delta_usage_per_month($year,$user_id);
+		$data = $stats->get_delta_usage_per_month($year,$directory_id);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Month","type"=>"string"), array("label"=>"∆ Usage (TB)","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -59,7 +62,7 @@
 	}
 	else if ($graph_type=='user_smallfiles_per_month'){
 		$stats = new statistics($db);
-		$data = $stats->get_smallfiles_per_month($year,$user_id);
+		$data = $stats->get_smallfiles_per_month($year,$directory_id);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Month","type"=>"string"),array("label"=>"# of Files","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -75,7 +78,7 @@
 	}
 	else if ($graph_type=='user_cost_per_month'){
 		$stats = new statistics($db);
-		$data = $stats->get_cost_per_month($year,$user_id);
+		$data = $stats->get_cost_per_month($year,$directory_id);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Month","type"=>"string"),array("label"=>"Cost of Archive Usage","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -91,7 +94,7 @@
 	}
 	else if ($graph_type=='user_balance_per_month'){
 		$stats = new statistics($db);
-		$data = $stats->get_balance_per_month($year,$user_id);
+		$data = $stats->get_balance_per_month($year,$directory_id);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Month","type"=>"string"),array("label"=>"Balance","type"=>"number") );
 		$jsonData['rows'] = array();

@@ -5,16 +5,15 @@ class user {
 
 	private $db; //mysql database object
 	private $id;
-	private $user_name;
-	private $full_name;
-	private $archive_directory;
-	private $has_directory;
+	private $username;
+	private $name;
 	private $enabled;
 	private $time_created;
 	private $ldap;
-	private $cfop;
 	private $email;
 	private $admin;
+	
+	private $directories = NULL;
 	////////////////Public Functions///////////
 
 	public function __construct($db,$ldap,$id = 0,$username = "") {
@@ -32,10 +31,9 @@ class user {
 	}
 	
 	// Inserts a user into the database with the given values, then loads that user into this object. Displays errors if there are any.
-	public function create($username,$admin,$hasdir,$archive_dir,$cfop) {
+	public function create($username,$admin) {
 		$username = trim(rtrim($username));
 		
-
 		$error = false;
 		$message = "";
 		//Verify Username
@@ -51,15 +49,6 @@ class user {
 			$error = true;
 			$message = "<div class='alert alert-danger'>User does not exist in LDAP database.</div>";
 		}
-		
-		// Check if archive dir is already there'
-		if ($hasdir && $archive_dir == ""){
-			$error = true;
-			$message .= "<div class='alert alert-danger'>Please enter a directory.</div>";
-		} else if ($hasdir && $this->data_dir_exists($archive_dir)) {
-			$error = true;
-			$message .= "<div class='alert alert-danger'>Directory " . $archive_dir . " is already in the database</div>";
-		}
 
 		//If Errors, return with error messages
 		if ($error) {
@@ -74,8 +63,7 @@ class user {
 				$this->load_by_username($username);
 				$this->enable();
 				$this->set_admin($admin);
-				$this->set_has_directory($hasdir);
-				if($this->has_directory()){
+				if($hasdir){
 					$this->set_archive_directory($archive_dir);
 					$this->set_cfop($cfop);
 				}
@@ -83,8 +71,8 @@ class user {
 			}
 			else {
 				$full_name = $this->ldap->get_ldap_full_name($username);
-				$sql = "insert into accounts (`username`,`name`,`is_admin`,`is_enabled`,`archive_directory`,`cfop`,`time_created`,`has_directory`) values (:username,:fullname,:admin,1,:archivedir,:cfop,NOW(),:hasdir)";
-				$args = array(':username'=>$username,':fullname'=>$full_name,':admin'=>$admin,':archivedir'=>$archive_dir,':cfop'=>$cfop,':hasdir'=>$hasdir);
+				$sql = "insert into users (`username`,`name`,`is_admin`,`is_enabled`,`time_created`) values (:username,:fullname,:admin,1,NOW())";
+				$args = array(':username'=>$username,':fullname'=>$full_name,':admin'=>$admin);
 				$user_id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($user_id);
 			}
@@ -98,37 +86,34 @@ class user {
 		return $this->id;
 	}
 	public function get_username() {
-		return $this->user_name;
+		return $this->username;
 	}
 	public function get_email() {
 		return $this->email;
 	}
-	public function get_full_name() {
-		return $this->full_name;
-	}
-	public function get_archive_directory() {
-		return $this->archive_directory;
+	public function get_name() {
+		return $this->name;
 	}
 	public function get_enabled() {
 		return $this->enabled;
 	}
-	public function get_cfop() {
-		return $this->cfop;
-	}
-	public function get_cfop_college(){
-		return substr($this->get_cfop(),0,1);
-	}
-	public function get_cfop_fund(){
-		return substr($this->get_cfop(),2,6);
-	}
-	public function get_cfop_organization(){
-		return substr($this->get_cfop(),9,6);
-	}
-	public function get_cfop_program(){
-		return substr($this->get_cfop(),16,6);
-	}
 	public function get_time_created() {
 		return $this->time_created;
+	}
+	public function get_directories(){
+		if($this->directories == NULL){
+			$sql = "select id from directories where user_id=:id and is_enabled=1";
+			$args = array(':id'=>$this->id);
+			$results = $this->db->query($sql,$args);
+			
+			$this->directories = array();
+			foreach($results as $row){
+				$directory = new archive_directory($this->db);
+				$directory->load_by_id($row['id']);
+				$this->directories[] = $directory;
+			}
+		}
+		return $this->directories;
 	}
 	// Gets a summary of data usage for this user for the given month
 	public function get_data_summary($month,$year) {
@@ -138,20 +123,21 @@ class user {
 			$prevyear = $prevyear - 1;
 			$prevmonth = 12;
 		}
-		$sql = "SELECT account_id, ROUND(directory_size/1048576,4) as terabytes, num_small_files, usage_time, sum(cost) as cost, (select ROUND(directory_size/1048576,4) from archive_usage where account_id=:id and year(`usage_time`)=:prevyear and month(`usage_time`)=:prevmonth order by usage_time limit 1) as prevusage ";
-		$sql .= "FROM archive_usage ";
-		$sql .= "WHERE account_id=:id ";
-		$sql .= "AND YEAR(`usage_time`)=:year ";
-        $sql .= "AND MONTH(`usage_time`)=:month ";
-        $sql .= "order by usage_time";
+		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, sum(u.cost) as cost, (select ROUND(u1.directory_size/1048576,4) from archive_usage u1 left join directories d1 on u1.directory_id=d1.id where d1.user_id=:id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1) as prevusage, d.cfop as cfop ";
+		$sql .= "FROM archive_usage u ";
+		$sql .= "left join directories d on u.directory_id=d.id ";
+		$sql .= "WHERE d.user_id=:id ";
+		$sql .= "AND YEAR(u.`usage_time`)=:year ";
+        $sql .= "AND MONTH(u.`usage_time`)=:month ";
+        $sql .= "order by u.usage_time";
         $args = array(':id'=>$this->get_user_id(),':year'=>$year,':month'=>$month,':prevyear'=>$prevyear,':prevmonth'=>$prevmonth);
-		return $this->db->query($sql,$args);
+        return $this->db->query($sql,$args);
 	}
 	
 	// Checks to see if the given directory is already associated with any user
 	private function data_dir_exists($directory) {
-		$sql = "SELECT count(1) as count FROM accounts ";
-		$sql .= "WHERE archive_directory LIKE :dir ";
+		$sql = "SELECT count(1) as count FROM directories ";
+		$sql .= "WHERE directory LIKE :dir ";
 		$sql .= "AND is_enabled='1'";
 		$args = array(':dir'=>$directory.'%');
 		$result = $this->db->query($sql,$args);
@@ -165,7 +151,7 @@ class user {
 	
 	// Enables this user
 	public function enable() {
-		$sql = "UPDATE accounts SET is_enabled='1' WHERE id=:id LIMIT 1";
+		$sql = "UPDATE users SET is_enabled='1' WHERE id=:id LIMIT 1";
 		$args = array(':id'=>$this->get_user_id());
 		$this->db->non_select_query($sql,$args);
 		$this->enabled = true;
@@ -176,17 +162,13 @@ class user {
 		$message;
 		$error = false;
 		
-		$sql = "update accounts set is_enabled='0' where id=:id limit 1";
+		$sql = "update users set is_enabled='0' where id=:id limit 1";
 		$args = array(':id'=>$this->get_user_id());
 		$this->enabled = false;
 		$this->db->non_select_query($sql,$args);
 		
 		$message = "User successfully deleted";
 		return array('RESULT'=>true,'MESSAGE'=>$message);
-	}
-
-	public function has_directory(){
-		return $this->has_directory;
 	}
 
 	public function is_admin() {
@@ -196,42 +178,26 @@ class user {
 	public function is_user() {
 		return !$this->admin;
     }
+    
+    public function has_directory(){
+	    $sql = "select count(id) as count from directories where user_id=:userid and is_enabled=1";
+	    $args = array(':userid'=>$this->id);
+	    $result = $this->db->query($sql,$args);
+	    if($result[0]['count'] > 0){
+		    return true;
+	    } else {
+		    return false;
+	    }
+    }
 	
 	// Makes the user an admin (or not)
 	public function set_admin($admin) {
-		$sql = "UPDATE accounts SET is_admin=:admin ";
+		$sql = "UPDATE users SET is_admin=:admin ";
 		$sql .= "WHERE id=:id LIMIT 1";
 		$args = array(':admin'=>$admin,':id'=>$this->get_user_id());
 		$result = $this->db->non_select_query($sql,$args);
 		if ($result) {
 			$this->admin = $admin;
-		}
-		return $result;
-	}
-	public function set_has_directory($hasdir){
-		$sql = "update accounts set has_directory=:hasdir where id=:id limit 1";
-		$args = array(':hasdir'=>$hasdir,':id'=>$this->get_user_id());
-		$result = $this->db->non_select_query($sql,$args);
-		if($result){
-			$this->has_directory = $hasdir;
-		}
-		return $result;
-	}
-	public function set_archive_directory($archive_dir){
-		$sql = "update accounts set archive_directory=:archive_dir where id=:id limit 1";
-		$args = array(':archive_dir'=>$archive_dir,':id'=>$this->get_user_id());
-		$result = $this->db->non_select_query($sql,$args);
-		if($result){
-			$this->archive_directory = $archive_dir;
-		}
-		return $result;
-	}
-	public function set_cfop($cfop){
-		$sql = "update accounts set cfop=:cfop where id=:id limit 1";
-		$args = array(':cfop'=>$cfop,':id'=>$this->get_user_id());
-		$result = $this->db->non_select_query($sql,$args);
-		if($result){
-			$this->cfop = $cfop;
 		}
 		return $result;
 	}
@@ -267,7 +233,7 @@ class user {
 		$this->get_user();
 	}
 	private function load_by_username($username) {
-		$sql = "SELECT id FROM accounts WHERE username = :username LIMIT 1";
+		$sql = "SELECT id FROM users WHERE username = :username LIMIT 1";
 		$args = array(':username'=>$username);
 		$result = $this->db->query($sql,$args);
 		if (isset($result[0]['id'])) {
@@ -277,27 +243,24 @@ class user {
 	}
 	private function get_user() {
 
-		$sql = "SELECT name, username, archive_directory, is_admin, is_enabled, time_created, cfop, has_directory ";
-		$sql .= "FROM accounts ";
-		$sql .= "WHERE accounts.id=:id ";
+		$sql = "SELECT name, username, is_admin, is_enabled, time_created ";
+		$sql .= "FROM users ";
+		$sql .= "WHERE id=:id ";
 		$sql .= "LIMIT 1";
 		$args = array(':id'=>$this->id);
 		$result = $this->db->query($sql,$args);
 		if (count($result)) {
-			$this->user_name = $result[0]['username'];
+			$this->username = $result[0]['username'];
 			$this->admin = $result[0]['is_admin'];
-			$this->full_name = $result[0]['name'];
-			$this->cfop = $result[0]['cfop'];
+			$this->name = $result[0]['name'];
 			$this->time_created = $result[0]['time_created'];
 			$this->enabled = $result[0]['is_enabled'];
-			$this->has_directory = $result[0]['has_directory'];
 			$this->email = $this->ldap->get_email($this->get_username());
-			$this->archive_directory = $result[0]['archive_directory'];
 		}
 	}
 	private function get_user_exist($username) {
 
-		$sql = "SELECT COUNT(1) as count FROM accounts WHERE username=:username AND is_enabled='1'";
+		$sql = "SELECT COUNT(1) as count FROM users WHERE username=:username AND is_enabled='1'";
 		$args = array(':username'=>$username);
 		$result = $this->db->query($sql,$args);
 		return $result[0]['count'];
@@ -317,7 +280,7 @@ class user {
     }
 
 	private function is_disabled($username) {
-		$sql = "select count(id) as count from accounts where username=:username and is_enabled=0 limit 1";
+		$sql = "select count(id) as count from users where username=:username and is_enabled=0 limit 1";
 		$args = array(':username'=>$username);
 		$result = $this->db->query($sql,$args);
 		if ($result[0]['count'] == 1) {

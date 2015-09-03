@@ -98,11 +98,7 @@ class html {
 	                	$users_html .= "<td><a href='user.php?user_id=" . $users[$i]['id'] . "'>";
 						$users_html .= $users[$i]['username'] . "</a></td>";
 		                $users_html .= "<td>" . $users[$i]['name']. "</td>";
-		                if($users[$i]['has_directory'] == 1){
-		                	$users_html .= "<td>".__ARCHIVE_DIR__.$users[$i]['archive_directory']."</td>";
-		                } else {
-			                $users_html .= "<td></td>";
-		                }
+	                	$users_html .= "<td>" . $users[$i]['directory'] . "</td>";
 						$users_html .= "<td>" . $user_admin . "</td>";
 				
 				if ($users[$i]['user_ldap']) {
