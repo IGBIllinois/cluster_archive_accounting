@@ -11,7 +11,18 @@
 	$graph_type_array[4]['title'] = 'Balance per Month';
 	
 	// Default graph settings
-	$directory_id = $login_user->get_directories()[0]->get_id();
+	$directories = $login_user->get_directories();
+	$directory_id = 0;
+	if(count($directories)>0){
+		$directory_id = $directories[0]->get_id();
+	}
+	// User list
+	$user_list = array();
+	$user_list = user_functions::get_graph_users($db,$login_user);
+	if($directory_id==0){
+		$directory_id = $user_list[0]['dir_id'];
+	}
+	
 	$year = date('Y');
 	$graph_type = $graph_type_array[0]['type'];
 	if(isset($_POST['get_job_graph'])){
@@ -59,25 +70,10 @@
 	
 	}
 	$year_form .= "</select>";
-	//list of users to select from
-	$user_list = array();
-	if ($login_user->is_admin()) {
-	    $user_list = user_functions::get_graph_users($db);
-	}
+
 	$user_list_html = "";
 	if (count($user_list)) {
         $user_list_html = "<div class='form-group'><label class='inline'>Directory:</label> <select class='form-control input-sm' name='directory_id'>";
-/*
-        if ((!isset($_GET['user_id'])) || ($_GET['user_id'] == $login_user->get_user_id())) {
-            $user_list_html .= "<option value='" . $login_user->get_user_id(). "' selected='selected'>";
-            $user_list_html .= $login_user->get_username() . "</option>";
-        }
-        else {
-            $user_list_html .= "<option value='" . $login_user->get_user_id() . "'>";
-            $user_list_html .= $login_user->get_username() . "</option>";
-        }
-*/
-
         foreach ($user_list as $user) {
             if ($user['dir_id'] == $directory_id) {
                 $user_list_html .= "<option value='" . $user['dir_id'] . "' selected='true'>" . $user['username'] ." - ".__ARCHIVE_DIR__.$user['directory'] . "</option>";
@@ -93,11 +89,7 @@
 <h3>Yearly Stats - <?php echo $year;?></h3>
 <form class="form-inline" method="post" action='<?php echo $_SERVER['PHP_SELF'];?>'>
 	<?php
-		if($login_user->is_admin()){
-			echo $user_list_html;
-		} else {
-			echo '<input type="hidden" name="user_id" value="'.$user_id."'>";
-		}
+		echo $user_list_html;
 	?>
 	<div class="form-group">
 		<label>Year:</label>

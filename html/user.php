@@ -83,8 +83,8 @@
 	<div class="btn-group">
 		<a href="edit_user.php?user_id=<?php echo $user_id; ?>" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit User</a>
 		<?php if(count($user->get_directories())==1){?>
-		<a href="edit_directory.php?directory_id=<?php echo $user->get_directories()[0]->get_id();?>" class="btn btn-primary btn"><span class="glyphicon glyphicon-pencil"></span> Edit Directory</a>
-		<a href="log_transaction.php?directory_id=<?php echo $user->get_directories()[0]->get_id(); ?>" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Add Transaction</a>
+		<a href="edit_directory.php?directory_id=<?php echo $directories[0]->get_id();?>" class="btn btn-primary btn"><span class="glyphicon glyphicon-pencil"></span> Edit Directory</a>
+		<a href="log_transaction.php?directory_id=<?php echo $directories[0]->get_id(); ?>" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Add Transaction</a>
 		<?php } ?>
 		<a href="user_bill.php?user_id=<?php echo $user_id; ?>" class="btn btn-info">User Bill</a>
 	</div>

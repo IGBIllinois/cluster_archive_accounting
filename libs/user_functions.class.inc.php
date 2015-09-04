@@ -8,16 +8,16 @@ class user_functions {
     	$search = strtolower(trim(rtrim($search)));
         $where_sql = array();
 
-    	$sql = "SELECT users.*, group_concat(concat(:basedir,directory) separator ', ') as `directory` FROM users left join directories on directories.user_id=users.id ";
+    	$sql = "select u.*, (select group_concat(concat('/archive/',d1.directory) separator ', ') from users u1 left join directories d1 on u1.id=d1.user_id where d1.is_enabled=1 and u1.id=u.id) as `directory` from users u ";
     	$args = array(':basedir'=>__ARCHIVE_DIR__);
-        array_push($where_sql,"users.is_enabled='1' and directories.is_enabled=1");
+        array_push($where_sql,"u.is_enabled=1 ");
 
     	if ($search != "" ) {
         	$terms = explode(" ",$search);
         	$termcount=0;
             foreach ($terms as $term) {
-	                $search_sql = "(LOWER(username) LIKE :term".$termcount." OR ";
-        	        $search_sql .= "LOWER(name) LIKE :term".$termcount.") ";
+	                $search_sql = "(LOWER(u.username) LIKE :term".$termcount." OR ";
+        	        $search_sql .= "LOWER(u.name) LIKE :term".$termcount.") ";
                 	array_push($where_sql,$search_sql);
                 	$args['term'.$termcount] = '%'.$term.'%';
                 	$termcount++;
@@ -36,7 +36,7 @@ class user_functions {
             	}
 
         }
-    	$sql .= " group by username ORDER BY username ASC ";
+    	$sql .= "  ORDER BY u.username ASC ";
     	$result = $db->query($sql,$args);
 
         if ($ldap != "") {
@@ -54,9 +54,14 @@ class user_functions {
     	return $result;
 	}
 	
-	public static function get_graph_users($db){
-		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 order by username asc";
+	public static function get_graph_users($db,$user){
+		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 ";
 		$args = array();
+		if(!$user->is_admin()){
+			$sql .= "and u.id=:userid ";
+			$args[':userid']=$user->get_user_id();
+		}
+		$sql .= "order by username asc";
 		$result = $db->query($sql,$args);
 		return $result;
 	}

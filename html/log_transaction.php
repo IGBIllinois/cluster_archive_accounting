@@ -20,7 +20,7 @@
 		}
 	}
 
-	$user_list = user_functions::get_graph_users($db);
+	$user_list = user_functions::get_graph_users($db,$login_user);
 	$user_list_html = "";
 	if (count($user_list)) {
 		$user_list_html = "<select class='form-control' name='directory_id'>";

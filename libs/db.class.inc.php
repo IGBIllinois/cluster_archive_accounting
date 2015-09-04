@@ -68,7 +68,7 @@ class db {
 	//$sql - sql string to run on the database
 	//$args - array of arguments to insert into sql string
 	//returns the id number of the new record, 0 if it fails
-	public function insert_query($sql,$args=[]) {
+	public function insert_query($sql,$args=array()) {
 		$result = $this->link->prepare($sql);
 		$retVal = $result->execute($args);
 		if ($retVal === false) {
@@ -110,7 +110,7 @@ class db {
 	//$sql - sql string to run on the database
 	//For update and delete queries
 	//returns true on success, false otherwise
-	public function non_select_query($sql,$args=[]) {
+	public function non_select_query($sql,$args=array()) {
 		$result = $this->link->prepare($sql);
 		$retval = $result->execute($args);
 		return $retval;
@@ -120,7 +120,7 @@ class db {
 	//$sql - sql string to run on the database
 	//Used for SELECT queries
 	//returns an associative array of the select query results.
-	public function query($sql,$args=[]) {
+	public function query($sql,$args=array()) {
 		$result = $this->link->prepare($sql);
 		$result->execute($args);
 		

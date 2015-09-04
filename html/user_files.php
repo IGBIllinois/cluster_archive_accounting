@@ -1,10 +1,21 @@
 <?php
 	require_once 'includes/header.inc.php';
 	
-	$directory_id = $login_user->get_directories()[0]->get_id();
+	$directories = $login_user->get_directories();
+	$directory_id = 0;
+	if(count($directories)>0){
+		$directory_id = $directories[0]->get_id();
+	}
 	if(isset($_GET['directory_id']) && is_numeric($_GET['directory_id'])){
 		$directory_id = $_GET['directory_id'];
 	}
+	// User list
+	$user_list = array();
+	$user_list = user_functions::get_graph_users($db,$login_user);
+	if($directory_id==0){
+		$directory_id = $user_list[0]['dir_id'];
+	}
+	
 	$directory = new archive_directory($db);
 	$directory->load_by_id($directory_id);
 	$user_id = $directory->get_user_id();
@@ -23,11 +34,6 @@
 	$end_date = date('Ymd',strtotime('-1 second',strtotime('+1 month',strtotime($start_date))));
 	$month_name = date('F',strtotime($start_date));
 	
-	// User list
-	$user_list = array();
-	if ($login_user->is_admin()) {
-		$user_list = user_functions::get_graph_users($db);
-	}
 	$user_list_html = "";
 	if (count($user_list)) {
 		$user_list_html = "<div class='form-group'><label>Directory: </label> <select class='form-control input-sm' name='directory_id'>";
@@ -72,9 +78,7 @@
 ?>
 	<h4>User File List - <?php echo $month_name . " " . $year; ?></h4>
 	<form class="form-inline" action='<?php echo $_SERVER['PHP_SELF']; ?>' method="get">
-		<?php if ($login_user->is_admin()){
-			echo $user_list_html;
-		} ?>
+		<?php echo $user_list_html;?>
 		<div class="form-group">
 			<label>Month: </label>
 			<?php echo $month_html; ?>
