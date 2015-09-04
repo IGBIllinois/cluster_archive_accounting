@@ -50,8 +50,12 @@ else {
 			foreach ( $allfiles as $key=>$file ){
 				preg_match("/^(.*)\\t(.*)/u", $file, $matches);
 				// Get date modified info for each file and save to database
-				$datestr = exec("ls -lT '".$matches[2]."' | awk '{print $6,$7,$9, $8}'");
-				$date = DateTime::createFromFormat('M d Y H:i:s',$datestr);
+				// Development environment uses this command (BSD)
+				//  $datestr = exec("ls -lT '".$matches[2]."' | awk '{print $6,$7,$9, $8}'");
+				//  $date = DateTime::createFromFormat('M d Y H:i:s',$datestr);
+				// Production environment uses this command (Linux)
+				$datestr = exec("stat --format='%Y' '".$matches[2]."'");
+				$date = DateTime::createFromFormat('U',$datestr);
 				// Store file info in database
 				$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 			}
