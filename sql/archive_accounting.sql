@@ -38,6 +38,22 @@ CREATE TABLE `archive_usage` (
 
 
 
+# Dump of table cfops
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `cfops`;
+
+CREATE TABLE `cfops` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `directory_id` int(11) unsigned NOT NULL,
+  `cfop` varchar(64) NOT NULL DEFAULT '',
+  `active` int(11) NOT NULL,
+  `time_created` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
 # Dump of table directories
 # ------------------------------------------------------------
 
@@ -48,7 +64,6 @@ CREATE TABLE `directories` (
   `user_id` int(11) NOT NULL,
   `directory` varchar(256) NOT NULL DEFAULT '',
   `time_created` datetime NOT NULL,
-  `cfop` varchar(64) DEFAULT NULL,
   `is_enabled` int(11) NOT NULL DEFAULT '1',
   `do_not_bill` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)

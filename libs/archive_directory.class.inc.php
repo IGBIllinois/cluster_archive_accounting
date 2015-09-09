@@ -6,6 +6,7 @@
 		private $directory;
 		private $time_created;
 		private $cfop;
+		private $cfop_id;
 		private $enabled;
 		private $do_not_bill;
 		
@@ -25,14 +26,15 @@
 				$this->set_do_not_bill($dnb);
 			} else {
 				// Create if does not exist				
-				$sql = "insert into directories (user_id,directory,time_created,cfop,is_enabled,do_not_bill) values (:userid,:directory,NOW(),:cfop,1,:dnb)";
+				$sql = "insert into directories (user_id,directory,time_created,is_enabled,do_not_bill) values (:userid,:directory,NOW(),1,:dnb)";
 				$args = array(':userid'=>$user_id,':directory'=>$directory,':cfop'=>$cfop,':dnb'=>$dnb);
 				$this->id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($this->id);
+				$this->set_cfop($cfop);
 			}
 		}
 		public function load_by_id($id){
-			$sql = "select * from directories where id = :id";
+			$sql = "select d.*, c.cfop, c.id as cfop_id from directories d left join cfops c on d.id=c.directory_id where d.id = :id and c.active=1 limit 1";
 			$args = array(':id'=>$id);
 			$results = $this->db->query($sql,$args);
 			$this->id =				$results[0]['id'];
@@ -40,6 +42,7 @@
 			$this->directory =		$results[0]['directory'];
 			$this->time_created =	$results[0]['time_created'];
 			$this->cfop =			$results[0]['cfop'];
+			$this->cfop_id =		$results[0]['cfop_id'];
 			$this->enabled =		$results[0]['is_enabled'];
 			$this->do_not_bill =	$results[0]['do_not_bill'];
 		}
@@ -121,13 +124,18 @@
 		}
 		
 		public function set_cfop($cfop){
-			$sql = "update directories set cfop=:cfop where id=:id limit 1";
-			$args = array(':cfop'=>$cfop,':id'=>$this->id);
-			$result = $this->db->non_select_query($sql,$args);
-			if($result){
-				$this->cfop = $cfop;
-			}
-			return $result;
+			$sql = "update cfops set active=0 where directory_id=:id";
+			$args = array(':id'=>$this->id);
+			$this->db->non_select_query($sql,$args);
+			
+			$sql = "insert into cfops (directory_id,cfop,active,time_created) values (:dirid,:cfop,1,NOW())";
+			$args = array(':dirid'=>$this->id,':cfop'=>$cfop);
+			$result = $this->db->insert_query($sql,$args);
+			
+			$this->cfop = $cfop;
+			$this->cfop_id = $result;
+			
+			return $result>0;
 		}
 		public function set_directory($directory){
 			$sql = "update directories set directory=:directory where id=:id limit 1";
