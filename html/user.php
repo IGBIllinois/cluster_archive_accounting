@@ -20,9 +20,9 @@
 			$balance = transaction::latestTransaction($db,$directory->get_id());
 			$directory_html .= "<tr class='topborder'><td>Directory:</td><td>".__ARCHIVE_DIR__.$directory->get_directory();
 			$directory_html .= "</td></tr>";
-			$directory_html .= "<tr><td>CFOP:</td><td>".$directory->get_cfop()."</td></tr>";
+			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>CFOP:</td><td>".$directory->get_cfop()."</td></tr>";
 			$directory_html .= "<tr><td>Usage:</td><td>".number_format($usage->get_directory_size()/1048576,4)." TB</td></tr>";
-			$directory_html .= "<tr><td>Balance:</td><td>$".$balance->get_balance()."</td></tr>";
+			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Balance:</td><td>$".$balance->get_balance()."</td></tr>";
 			if($login_user->is_admin() && count($directories)>1){
 				$directory_html .= "<tr><td></td><td><div class='btn-group btn-group-sm'>";
 				$directory_html .= "<a href='edit_directory.php?directory_id=".$directory->get_id()."' class='btn btn-primary'><span class='glyphicon glyphicon-pencil'></span> Edit Directory</a>";

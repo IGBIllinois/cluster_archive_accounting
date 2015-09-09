@@ -123,7 +123,7 @@ class user {
 			$prevyear = $prevyear - 1;
 			$prevmonth = 12;
 		}
-		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, u.cost as cost, coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, d.cfop as cfop ";
+		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, u.cost as cost, coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, d.cfop as cfop, d.do_not_bill as do_not_bill ";
 		$sql .= "FROM archive_usage u ";
 		$sql .= "left join directories d on u.directory_id=d.id ";
 		$sql .= "WHERE d.user_id=:id ";
@@ -192,8 +192,7 @@ class user {
 	
 	// Makes the user an admin (or not)
 	public function set_admin($admin) {
-		$sql = "UPDATE users SET is_admin=:admin ";
-		$sql .= "WHERE id=:id LIMIT 1";
+		$sql = "update users set is_admin=:admin where id=:id limit 1";
 		$args = array(':admin'=>$admin,':id'=>$this->get_user_id());
 		$result = $this->db->non_select_query($sql,$args);
 		if ($result) {
@@ -243,19 +242,16 @@ class user {
 	}
 	private function get_user() {
 
-		$sql = "SELECT name, username, is_admin, is_enabled, time_created ";
-		$sql .= "FROM users ";
-		$sql .= "WHERE id=:id ";
-		$sql .= "LIMIT 1";
+		$sql = "select * from users where id=:id limit 1";
 		$args = array(':id'=>$this->id);
 		$result = $this->db->query($sql,$args);
 		if (count($result)) {
-			$this->username = $result[0]['username'];
-			$this->admin = $result[0]['is_admin'];
-			$this->name = $result[0]['name'];
-			$this->time_created = $result[0]['time_created'];
-			$this->enabled = $result[0]['is_enabled'];
-			$this->email = $this->ldap->get_email($this->get_username());
+			$this->username =		$result[0]['username'];
+			$this->admin =			$result[0]['is_admin'];
+			$this->name =			$result[0]['name'];
+			$this->time_created =	$result[0]['time_created'];
+			$this->enabled =		$result[0]['is_enabled'];
+			$this->email =			$this->ldap->get_email($this->get_username());
 		}
 	}
 	private function get_user_exist($username) {

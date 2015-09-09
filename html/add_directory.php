@@ -12,11 +12,18 @@
 		foreach($_POST as $var){
 			$var = trim(rtrim($var));
 		}
-		$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
-		if($cfop=="---")$cfop="";
+		$dnb = 0;
+		if(isset($_POST['do_not_bill'])){
+			$dnb = 1;
+		}
+		$cfop="";
+		if($dnb==0){
+			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
+			if($cfop=="---")$cfop="";
+		}
 		
 		$directory = new archive_directory($db);
-		$directory->create($_POST['user_id'],$_POST['archive_dir'],$cfop);
+		$directory->create($_POST['user_id'],$_POST['archive_dir'],$cfop,$dnb);
 		header('location:user.php?user_id='.$_POST['user_id']);
 	} else if (isset($_POST['cancel_user'])){
 		unset($_POST);
@@ -54,13 +61,21 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-2 control-label" for="hasdir-input">Do not bill:</label>
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label><input type="checkbox" name="do_not_bill" id="dnb_input" <?php if(isset($_POST['do_not_bill'])){echo 'checked="checked"';}?> /></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="col-sm-2 control-label">CFOP:</label>
 			<div class="col-sm-4">
 				<div class="row">
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_1'];}?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php if (isset($_POST['cfop_2'])){echo $_POST['cfop_2'];}?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>"/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_1'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php if (isset($_POST['cfop_2'])){echo $_POST['cfop_2'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
 				</div>
 			</div>
 		</div>
@@ -73,5 +88,8 @@
 		</div>
 	</fieldset>
 </form>
+<script type="text/javascript">
+	$('#dnb_input').on('click',bill_toggle);
+</script>
 <?php
 	require_once 'includes/footer.inc.php';

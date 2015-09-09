@@ -21,8 +21,14 @@
 		}
 		$cfop = "";
 		if($hasdir==1){
-			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
-			if($cfop=="---")$cfop="";
+			$dnb = 0;
+			if(isset($_POST['do_not_bill'])){
+				$dnb = 1;
+			}
+			if($dnb==0){
+				$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
+				if($cfop=="---")$cfop="";
+			}
 			$archive_dir = "";
 			if(isset($_POST['archive_dir']) && $_POST['archive_dir']!=""){
 				$archive_dir = $_POST['archive_dir'];
@@ -40,7 +46,7 @@
 				// Add directory if needed
 				if($hasdir==1){
 					$directory = new archive_directory($db);
-					$directory->create($result['user_id'],$archive_dir,$cfop);
+					$directory->create($result['user_id'],$archive_dir,$cfop,$dnb);
 				}
 				header("Location: user.php?user_id=".$result['user_id']);
 			} else if ($result['RESULT'] == false) {
@@ -86,13 +92,21 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-2 control-label" for="hasdir-input">Do not bill:</label>
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label><input type="checkbox" name="do_not_bill" id="dnb_input" <?php if(isset($_POST['do_not_bill'])){echo 'checked="checked"';}?> /></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="col-sm-2 control-label">CFOP:</label>
 			<div class="col-sm-4">
 				<div class="row">
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_1'];}?>" <?php if(isset($_POST['add_user'])&&!isset($_POST['has_dir']))echo 'disabled';?>/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php if (isset($_POST['cfop_2'])){echo $_POST['cfop_2'];}?>" <?php if(isset($_POST['add_user'])&&!isset($_POST['has_dir']))echo 'disabled';?>/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>" <?php if(isset($_POST['add_user'])&&!isset($_POST['has_dir']))echo 'disabled';?>/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>" <?php if(isset($_POST['add_user'])&&!isset($_POST['has_dir']))echo 'disabled';?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_1'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php if (isset($_POST['cfop_2'])){echo $_POST['cfop_2'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
 				</div>
 			</div>
 		</div>
@@ -107,6 +121,7 @@
 </form>
 <script type="text/javascript">
 	$('#hasdir_input').on("click",directory_toggle);
+	$('#dnb_input').on('click',bill_toggle);
 </script>
 <?php
 	if(isset($message))echo $message;

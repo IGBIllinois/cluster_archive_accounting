@@ -7,13 +7,14 @@
 		private $time_created;
 		private $cfop;
 		private $enabled;
+		private $do_not_bill;
 		
 		public function __construct($db){
 			$this->db = $db;
 		}
 		public function __destruct(){}
 		
-		public function create($user_id,$directory,$cfop){
+		public function create($user_id,$directory,$cfop,$dnb){
 			// TODO add a bit of error-checking
 			if(self::is_disabled($this->db,$directory)){
 				// Re-enable if disabled.
@@ -21,10 +22,11 @@
 				$this->enable();
 				$this->set_user_id($user_id);
 				$this->set_cfop($cfop);
+				$this->set_do_not_bill($dnb);
 			} else {
 				// Create if does not exist				
-				$sql = "insert into directories (user_id,directory,time_created,cfop,is_enabled) values (:userid,:directory,NOW(),:cfop,1)";
-				$args = array(':userid'=>$user_id,':directory'=>$directory,':cfop'=>$cfop);
+				$sql = "insert into directories (user_id,directory,time_created,cfop,is_enabled,do_not_bill) values (:userid,:directory,NOW(),:cfop,1,:dnb)";
+				$args = array(':userid'=>$user_id,':directory'=>$directory,':cfop'=>$cfop,':dnb'=>$dnb);
 				$this->id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($this->id);
 			}
@@ -39,6 +41,7 @@
 			$this->time_created =	$results[0]['time_created'];
 			$this->cfop =			$results[0]['cfop'];
 			$this->enabled =		$results[0]['is_enabled'];
+			$this->do_not_bill =	$results[0]['do_not_bill'];
 		}
 		public function get_id(){
 			return $this->id;
@@ -63,6 +66,9 @@
 		}
 		public function get_cfop_program(){
 			return substr($this->get_cfop(),16,6);
+		}
+		public function get_do_not_bill() {
+			return $this->do_not_bill;
 		}
 		
 		public static function is_disabled($db,$directory){
@@ -129,6 +135,15 @@
 			$result = $this->db->non_select_query($sql,$args);
 			if($result){
 				$this->directory = $directory;
+			}
+			return $result;
+		}
+		public function set_do_not_bill($dnb){
+			$sql = "update directories set do_not_bill=:dnb where id=:id limit 1";
+			$args = array(':dnb'=>$dnb,':id'=>$this->id);
+			$result = $this->db->non_select_query($sql,$args);
+			if($result){
+				$this->do_not_bill = $dnb;
 			}
 			return $result;
 		}

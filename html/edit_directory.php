@@ -18,11 +18,22 @@
 		foreach($_POST as $var){
 			$var = trim(rtrim($var));
 		}
-		$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
-		if($cfop=="---")$cfop="";
-		if($directory->get_cfop() != $cfop){
-			if($directory->set_cfop($cfop)){
-				$message .= "<div class='alert alert-success'>CFOP successfully set</div>";
+		$dnb = 0;
+		if(isset($_POST['do_not_bill'])){
+			$dnb = 1;
+		}
+		if($directory->get_do_not_bill()!=$dnb){
+			$directory->set_do_not_bill($dnb);
+			$message .= "<div class='alert alert-success'>Do not bill successfully set</div>";
+		}
+		$cfop="";
+		if($dnb==0){
+			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
+			if($cfop=="---")$cfop="";
+			if($directory->get_cfop() != $cfop){
+				if($directory->set_cfop($cfop)){
+					$message .= "<div class='alert alert-success'>CFOP successfully set</div>";
+				}
 			}
 		}
 		if($directory->get_directory() != $_POST['archive_dir']){
@@ -56,13 +67,21 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-2 control-label" for="hasdir-input">Do not bill:</label>
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label><input type="checkbox" name="do_not_bill" id="dnb_input" <?php if($directory->get_do_not_bill()!=0){echo 'checked="checked"';}?> /></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="col-sm-2 control-label">CFOP:</label>
 			<div class="col-sm-4">
 				<div class="row">
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php echo $directory->get_cfop_college();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php echo $directory->get_cfop_fund();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php echo $directory->get_cfop_organization();?>"/></div>
-					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php echo $directory->get_cfop_program();?>"/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_1" maxlength="1" oninput="cfop_advance(1)" value="<?php echo $directory->get_cfop_college();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_2" maxlength="6" oninput="cfop_advance(2)" value="<?php echo $directory->get_cfop_fund();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php echo $directory->get_cfop_organization();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
+					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php echo $directory->get_cfop_program();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
 				</div>
 			</div>
 		</div>
@@ -77,7 +96,9 @@
 		</div>
 	</fieldset>
 </form>
-
+<script type="text/javascript">
+	$('#dnb_input').on('click',bill_toggle);
+</script>
 <?php
 	if(isset($message)){echo $message;}
 	require_once 'includes/footer.inc.php';

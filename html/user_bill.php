@@ -77,8 +77,12 @@
 			$data_html .= "<td>".__ARCHIVE_DIR__.$value['directory']."</td>";
 			$data_html .= "<td>".$value['terabytes']." TB</td>";
 			$data_html .= "<td>".$value['prevusage']." TB</td>";
-			$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
-			$data_html .= "<td>".$value['cfop']."</td>";
+			if($value['do_not_bill']==0){
+				$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
+				$data_html .= "<td>".$value['cfop']."</td>";
+			} else {
+				$data_html .= "<td colspan='2'></td>";
+			}
 			$data_html .= "</tr>";
 		}
 	}

@@ -29,10 +29,10 @@ DROP TABLE IF EXISTS `archive_usage`;
 CREATE TABLE `archive_usage` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `directory_id` int(11) unsigned NOT NULL,
-  `directory_size` int(11) NOT NULL COMMENT 'directory size in MB',
-  `num_small_files` int(11) NOT NULL,
+  `directory_size` int(11) NOT NULL DEFAULT '0' COMMENT 'directory size in MB',
+  `num_small_files` int(11) NOT NULL DEFAULT '0',
   `usage_time` datetime NOT NULL,
-  `cost` varchar(16) DEFAULT NULL,
+  `cost` varchar(16) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -49,7 +49,8 @@ CREATE TABLE `directories` (
   `directory` varchar(256) NOT NULL DEFAULT '',
   `time_created` datetime NOT NULL,
   `cfop` varchar(64) DEFAULT NULL,
-  `is_enabled` int(11) DEFAULT NULL,
+  `is_enabled` int(11) NOT NULL DEFAULT '1',
+  `do_not_bill` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

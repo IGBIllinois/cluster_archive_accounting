@@ -25,11 +25,11 @@
 			$existing = $this->db->non_select_query($sql,$args);
 			
 			// Calculate cost
-			$cost = self::dataCost($this->db,$usage);
+			$cost = self::dataCost($this->db,$usage,$directory_id);
 			
 			// Subtract amount already paid for
 			$latestUsage = data_usage::latestUsage($this->db,$directory_id);
-			$paid = $this->dataCost($this->db,$latestUsage->directory_size);
+			$paid = self::dataCost($this->db,$latestUsage->directory_size,$directory_id);
 			$cost = max(0,$cost-$paid);
 			
 			// Save info to database
@@ -48,14 +48,21 @@
 		}
 		
 		// Calculates the cost of a given directory size, based on the current settings and the previous month's usage data.
-		private static function dataCost($db,$usage){
-			$settings = new settings($db);
-			if($usage < intval($settings->get_setting("min_billable_data"))){
-				$cost = 0;
+		private static function dataCost($db,$usage,$directory_id){
+			$sql = "select do_not_bill from directories where id=:id";
+			$args = array(':id'=>$directory_id);
+			$result = $db->query($sql,$args);
+			if($result[0]['do_not_bill'] == 0){
+				$settings = new settings($db);
+				if($usage < intval($settings->get_setting("min_billable_data"))){
+					$cost = 0;
+				} else {
+					$cost = intval($settings->get_setting("data_cost")) * ceil($usage / 1048576.0);
+				}
+				return $cost;
 			} else {
-				$cost = intval($settings->get_setting("data_cost")) * ceil($usage / 1048576.0);
+				return 0;
 			}
-			return $cost;
 		}
 		
 		// Returns a data_usage object representing the latest usage scan for the given user.

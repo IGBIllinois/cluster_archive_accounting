@@ -17,10 +17,19 @@ function cfop_advance(num){
 
 function directory_toggle(e){
 	var hasdir = this.checked;
-	console.log('toggle',hasdir);
-	document.forms["form"]["cfop_1"].disabled = !hasdir;
-	document.forms["form"]["cfop_2"].disabled = !hasdir;
-	document.forms["form"]["cfop_3"].disabled = !hasdir;
-	document.forms["form"]["cfop_4"].disabled = !hasdir;
+	var dnb = document.forms["form"]["do_not_bill"].checked
+	document.forms["form"]["cfop_1"].disabled = !hasdir || dnb;
+	document.forms["form"]["cfop_2"].disabled = !hasdir || dnb;
+	document.forms["form"]["cfop_3"].disabled = !hasdir || dnb;
+	document.forms["form"]["cfop_4"].disabled = !hasdir || dnb;
+	document.forms["form"]["do_not_bill"].disabled = !hasdir;
 	document.forms["form"]["archive_dir"].disabled = !hasdir;
+}
+
+function bill_toggle(e){
+	var dnb = this.checked;
+	document.forms["form"]["cfop_1"].disabled = dnb;
+	document.forms["form"]["cfop_2"].disabled = dnb;
+	document.forms["form"]["cfop_3"].disabled = dnb;
+	document.forms["form"]["cfop_4"].disabled = dnb;
 }
