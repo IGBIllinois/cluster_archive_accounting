@@ -7,9 +7,9 @@
 	// Handle incoming post
 	if(isset($_POST['setting_key'])){
 		if($settings->set_setting($_POST['setting_key'],$_POST['setting_value'])){
-			$message = "<div class='alert alert-success'>Update successful</div>";
+			$message = html::success_message("Update successful");
 		} else {
-			$message = "<div class='alert alert-danger'>Update unsuccessful</div>";
+			$message = html::error_message("Update unsuccessful");
 		}
 	}
 	

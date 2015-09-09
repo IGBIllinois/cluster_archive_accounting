@@ -4,7 +4,7 @@ class user_functions {
 
 	//get_users()
 	//returns array of users
-	public static function get_users($db,$ldap = "",$search = "") {
+	public static function get_search_users($db,$ldap = "",$search = "") {
     	$search = strtolower(trim(rtrim($search)));
         $where_sql = array();
 
@@ -54,7 +54,7 @@ class user_functions {
     	return $result;
 	}
 	
-	public static function get_graph_users($db,$user){
+	public static function get_directories($db,$user){
 		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 ";
 		$args = array();
 		if(!$user->is_admin()){
@@ -62,6 +62,13 @@ class user_functions {
 			$args[':userid']=$user->get_user_id();
 		}
 		$sql .= "order by username asc";
+		$result = $db->query($sql,$args);
+		return $result;
+	}
+	
+	public static function get_billable_directories($db){
+		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 and d.do_not_bill=0 order by username asc";
+		$args = array();
 		$result = $db->query($sql,$args);
 		return $result;
 	}

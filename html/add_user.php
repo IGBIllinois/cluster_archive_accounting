@@ -33,7 +33,7 @@
 			if(isset($_POST['archive_dir']) && $_POST['archive_dir']!=""){
 				$archive_dir = $_POST['archive_dir'];
 			} else {
-				$message = "<div class='alert alert-danger'>Please enter a directory</div>";
+				$message = html::error_message("Please enter a directory");
 			}
 		}
 		

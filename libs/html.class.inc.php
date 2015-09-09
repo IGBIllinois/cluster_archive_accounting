@@ -128,7 +128,14 @@ class html {
 		}
 		return number_format($usage,$decimal).' '.$units[$i];
 	}
-
+	
+		
+	public static function success_message($message){
+		return "<div class='alert alert-success'>".$message."</div>";
+	}
+	public static function error_message($message){
+		return "<div class='alert alert-danger'>".$message."</div>";
+	}
 }
 
 ?>

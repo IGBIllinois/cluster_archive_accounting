@@ -18,7 +18,7 @@
 	}
 	// User list
 	$user_list = array();
-	$user_list = user_functions::get_graph_users($db,$login_user);
+	$user_list = user_functions::get_directories($db,$login_user);
 	if($directory_id==0){
 		$directory_id = $user_list[0]['dir_id'];
 	}
@@ -35,7 +35,7 @@
 	$directory->load_by_id($directory_id);
 	
 	if (!$login_user->permission($directory->get_id())) {
-        echo "<div class='alert alert-error'>Invalid Permissions</div>";
+        echo html::error_message("Invalid Permissions");
         exit;
 	}
 	

@@ -7,7 +7,7 @@
         $user_id = $_GET['user_id'];
 	}
 	if (!$login_user->permission($user_id)) {
-        echo "<div class='alert alert-error'>Invalid Permissions</div>";
+        echo html::error_message("Invalid Permissions");
         exit;
 	}
 	

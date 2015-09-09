@@ -24,7 +24,7 @@
 		}
 		if($directory->get_do_not_bill()!=$dnb){
 			$directory->set_do_not_bill($dnb);
-			$message .= "<div class='alert alert-success'>Do not bill successfully set</div>";
+			$message .= html::success_message("Do not bill successfully set");
 		}
 		$cfop="";
 		if($dnb==0){
@@ -32,13 +32,13 @@
 			if($cfop=="---")$cfop="";
 			if($directory->get_cfop() != $cfop){
 				if($directory->set_cfop($cfop)){
-					$message .= "<div class='alert alert-success'>CFOP successfully set</div>";
+					$message .= html::success_message("CFOP successfully set");
 				}
 			}
 		}
 		if($directory->get_directory() != $_POST['archive_dir']){
 			if($directory->set_directory($_POST['archive_dir'])){
-				$message .= "<div class='alert alert-success'>Directory successfully set</div>";
+				$message .= html::success_message("Directory successfully set");
 			}
 		}
 	} else if(isset($_POST['delete_dir'])){

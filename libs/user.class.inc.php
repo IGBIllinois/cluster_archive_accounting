@@ -39,15 +39,15 @@ class user {
 		//Verify Username
 		if ($username == "") {
 			$error = true;
-			$message = "<div class='alert alert-danger'>Please enter a username.</div>";
+			$message = html::error_message("Please enter a username.");
 		}
 		elseif ($this->get_user_exist($username)) {
 			$error = true;
-			$message .= "<div class='alert alert-danger'>User already exists in database.</div>";
+			$message .= html::error_message("User already exists in database.");
 		}
 		elseif (!$this->ldap->is_ldap_user($username)) {
 			$error = true;
-			$message = "<div class='alert alert-danger'>User does not exist in LDAP database.</div>";
+			$message = html::error_message("User does not exist in LDAP database.");
 		}
 
 		//If Errors, return with error messages

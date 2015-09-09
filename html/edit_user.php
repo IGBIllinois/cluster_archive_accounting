@@ -22,7 +22,7 @@
 		$user = new user($db,$ldap,$_POST['user_id']);
 		if ( $user->is_admin() != $admin ){
 			if ($user->set_admin($admin)) {
-				$message = "<div class='alert alert-success'>User Administrator successfully set</div>";
+				$message = html::success_message("User Administrator successfully set");
 			}
 		}
 	}

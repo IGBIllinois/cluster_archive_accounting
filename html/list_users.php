@@ -20,7 +20,7 @@
 		$get_array['search'] = $search;
 	}
 	
-	$all_users = user_functions::get_users($db,$ldap,$search);
+	$all_users = user_functions::get_search_users($db,$ldap,$search);
 	$num_users = count($all_users);
 	$pages_url = $_SERVER['PHP_SELF']."?".http_build_query($get_array);
 	$pages_html = html::get_pages_html($pages_url,$num_users,$start,$count);

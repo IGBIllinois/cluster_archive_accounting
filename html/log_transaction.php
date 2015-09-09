@@ -11,16 +11,16 @@
 
 	if(isset($_POST['directory_id'])){
 		if(!isset($_POST['amount']) || !is_numeric($_POST['amount'])){
-			$message = "<p class='alert alert-danger'>Invalid amount.</p>";
+			$message = html::error_message("Invalid amount.");
 		} else {
 			$trans = new transaction($db);
 			$trans->create($_POST['directory_id'],$_POST['amount'],null);
 			log::log_message("Transaction ".$trans->get_id()." added to database by user ".$login_user->get_username());
-			$message = "<p class='alert alert-success'>Transaction logged.</p>";
+			$message = html::error_message("Transaction logged.");
 		}
 	}
 
-	$user_list = user_functions::get_graph_users($db,$login_user);
+	$user_list = user_functions::get_billable_directories($db,$login_user);
 	$user_list_html = "";
 	if (count($user_list)) {
 		$user_list_html = "<select class='form-control' name='directory_id'>";
