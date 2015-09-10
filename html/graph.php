@@ -181,7 +181,7 @@
 		foreach($data as $row){
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
-					array("v"=>$row['username'].' - '.__ARCHIVE_DIR__.$row['directory']),
+					array("v"=>$row['username']),
 					array("v"=>floatval($row['total_usage']), "f"=>number_format($row['total_usage'],4)." TB") 
 				))
 			);
@@ -195,10 +195,10 @@
 		$jsonData['cols'] = array( array("label"=>"Directory","type"=>"string"),array("label"=>"∆ Usage (TB)","type"=>"number") );
 		$jsonData['rows'] = array();
 		foreach($data as $row){
-			if(floatval($row['total_delta'])>0){
+			if(floatval($row['total_delta'])>=0){
 				array_push($jsonData['rows'],
 					array( "c"=>array( 
-						array("v"=>$row['username'].' - '.__ARCHIVE_DIR__.$row['directory']),
+						array("v"=>$row['username']),
 						array("v"=>max(0,floatval($row['total_delta'])), "f"=>number_format($row['total_delta'],4)." TB") 
 					))
 				);
@@ -215,7 +215,7 @@
 		foreach($data as $row){
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
-					array("v"=>$row['username'].' - '.__ARCHIVE_DIR__.$row['directory']),
+					array("v"=>$row['username']),
 					array("v"=>floatval($row['total_cost']), "f"=>"$".number_format($row['total_cost'],2)) 
 				))
 			);
@@ -231,7 +231,7 @@
 		foreach($data as $row){
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
-					array("v"=>$row['username'].' - '.__ARCHIVE_DIR__.$row['directory']),
+					array("v"=>$row['username']),
 					array("v"=>intval($row['total_smallfiles']), "f"=>$row['total_smallfiles']) 
 				))
 			);
