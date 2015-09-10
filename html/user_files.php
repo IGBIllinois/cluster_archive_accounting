@@ -271,13 +271,16 @@
 			
 			// Initializer
 			function displayFileList(jsonData){
-				console.log(jsonData);
-				for(var i=0; i<jsonData.length; i++){
-					addFile(jsonData[i]);
+				if(jsonData.length==0){
+					$('.filelist').append('<p class="alert alert-warning">No files during this time period</p>');
+				} else {
+					for(var i=0; i<jsonData.length; i++){
+						addFile(jsonData[i]);
+					}
+					sortDir(root);
+					var $root = dirNode(root);
+					$('.filelist').append($root);
 				}
-				sortDir(root);
-				var $root = dirNode(root);
-				$('.filelist').append($root);
 			}
 			
 			// Click handler

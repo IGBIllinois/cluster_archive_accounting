@@ -198,7 +198,7 @@
 			array_push($jsonData['rows'],
 				array( "c"=>array( 
 					array("v"=>$row['username']),
-					array("v"=>floatval($row['total_delta']), "f"=>number_format($row['total_delta'],4)." TB") 
+					array("v"=>max(0,floatval($row['total_delta'])), "f"=>number_format($row['total_delta'],4)." TB") 
 				))
 			);
 		}

@@ -97,14 +97,13 @@
 							url: "graph.php?<?php echo http_build_query($get_array);?>",
 							dataType: "json",
 							success: function(jsonData){
-								console.log(jsonData);
 								var data = new google.visualization.DataTable(jsonData);
 						
 								var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
 								chart.draw(data,{width: 900,height: 600,hAxis:{showTextEvery:1,slantedText:true}});
 							},
 							error: function(jsonData){
-								document.write(jsonData.responseText);
+								console.log(jsonData.responseText);
 							}
 						});
 					}			
