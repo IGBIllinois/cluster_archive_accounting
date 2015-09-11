@@ -240,7 +240,8 @@
 				if(root.children.length == 0){
 					// Format date
 					var date = new Date(root.date);
-					var dateStr = padDigits(date.getMonth(),2)+'/'+padDigits(date.getDate(),2)+'/'+date.getFullYear();
+					var dateStr = padDigits(date.getMonth()+1,2)+'/'+padDigits(date.getDate(),2)+'/'+date.getFullYear(); //Date.getMonth() returns Jan=0, Feb=1, etc. Because of course it does.
+					console.log(root.date, date, dateStr);
 					
 					$node.append(' <div class="filetime">'+dateStr+'</div>');
 					
