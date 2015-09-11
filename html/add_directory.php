@@ -8,7 +8,6 @@
 	
 	$message="";
 	if(isset($_POST['add_dir'])){
-		var_dump($_POST);
 		foreach($_POST as $var){
 			$var = trim(rtrim($var));
 		}

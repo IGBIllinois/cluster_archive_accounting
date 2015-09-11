@@ -27,10 +27,10 @@
 			} else {
 				// Create if does not exist				
 				$sql = "insert into directories (user_id,directory,time_created,is_enabled,do_not_bill) values (:userid,:directory,NOW(),1,:dnb)";
-				$args = array(':userid'=>$user_id,':directory'=>$directory,':cfop'=>$cfop,':dnb'=>$dnb);
+				$args = array(':userid'=>$user_id,':directory'=>$directory,':dnb'=>$dnb);
 				$this->id = $this->db->insert_query($sql,$args);
-				$this->load_by_id($this->id);
 				$this->set_cfop($cfop);
+				$this->load_by_id($this->id);
 			}
 		}
 		public function load_by_id($id){
@@ -75,7 +75,7 @@
 		}
 		
 		public static function is_disabled($db,$directory){
-			$sql = "select count(id) as count from directories left join users on users.id=directories.user_id where directories.directory=:directory and (directories.is_enabled = 0 or users.is_enabled = 0)";
+			$sql = "select count(directories.id) as count from directories left join users on users.id=directories.user_id where directories.directory=:directory and (directories.is_enabled = 0 or users.is_enabled = 0)";
 			$args = array(':directory'=>$directory);
 			$result = $db->query($sql,$args);
 			if($result[0]['count']>0){
