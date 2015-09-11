@@ -26,6 +26,7 @@ else {
 	$arch_file = new archive_file($db);
 	foreach ( $rows as $key=>$row ){
 		if(file_exists(__ARCHIVE_DIR__.$row['directory'])){
+			echo __ARCHIVE_DIR__.$row['directory']."... ";
 			// Gather usage info
 			// Total Usage in MB
 			$usage = exec("du -am ".__ARCHIVE_DIR__.$row['directory']);
@@ -59,6 +60,7 @@ else {
 				// Store file info in database
 				$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 			}
+			echo $usage.' MB, '.count($allfiles)." files.\n";
 			log::log_message("Scanned ".__ARCHIVE_DIR__.$row['directory'].': '.$usage.' MB, '.count($allfiles).' files.');
 		} else {
 			log::log_message("Directory ".__ARCHIVE_DIR__.$row['directory'].' does not exit.');
