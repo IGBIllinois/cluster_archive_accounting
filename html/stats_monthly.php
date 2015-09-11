@@ -96,7 +96,6 @@
 				var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
 				chart.draw(data,{height: 600,hAxis:{showTextEvery:1,slantedText:true}});
 				$(window).resize(function(){
-					console.log("resize");
 			        chart.draw(data,{height: 600,hAxis:{showTextEvery:1,slantedText:true}});
 			    });
 			},

@@ -159,8 +159,10 @@
 					$i++;
 				}
 				$result = array_slice($allusage,0,$top,true);
-				$result[$top]['username'] = "Other";
-				$result[$top]['total_usage'] = $total_usage - $top_usage;
+				if($total_usage - $top_usage>0){
+					$result[$top]['username'] = "Other";
+					$result[$top]['total_usage'] = $total_usage - $top_usage;
+				}
 			} else {
 				$result = $allusage;
 			}
@@ -184,8 +186,10 @@
 					$i++;
 				}
 				$result = array_slice($alldelta,0,$top,true);
-				$result[$top]['username'] = "Other";
-				$result[$top]['total_delta'] = $total_delta - $top_delta;
+				if($total_delta - $top_delta>0){
+					$result[$top]['username'] = "Other";
+					$result[$top]['total_delta'] = $total_delta - $top_delta;
+				}
 			} else {
 				$result = $alldelta;
 			}
@@ -209,8 +213,10 @@
 					$i++;
 				}
 				$result = array_slice($allcost,0,$top,true);
-				$result[$top]['username'] = "Other";
-				$result[$top]['total_cost'] = $total_cost - $top_cost;
+				if($total_cost - $top_cost > 0){
+					$result[$top]['username'] = "Other";
+					$result[$top]['total_cost'] = $total_cost - $top_cost;
+				}
 			} else {
 				$result = $allcost;
 			}
@@ -234,8 +240,10 @@
 					$i++;
 				}
 				$result = array_slice($allsmallfiles,0,$top,true);
-				$result[$top]['username'] = "Other";
-				$result[$top]['total_smallfiles'] = $total_smallfiles - $top_smallfiles;
+				if($total_smallfiles - $top_smallfiles > 0){
+					$result[$top]['username'] = "Other";
+					$result[$top]['total_smallfiles'] = $total_smallfiles - $top_smallfiles;
+				}
 			} else {
 				$result = $allsmallfiles;
 			}
