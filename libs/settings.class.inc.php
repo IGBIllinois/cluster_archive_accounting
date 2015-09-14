@@ -6,7 +6,7 @@ class setting{
 	private $name;
 	private $modified;
 	
-	public function __construct($key,$value,$name,$description,$modified){
+	public function __construct($key,$value,$name,$modified){
 		$this->key =			$key;
 		$this->value =			$value;
 		$this->name =			$name;
