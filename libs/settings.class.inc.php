@@ -4,21 +4,18 @@ class setting{
 	private $key;
 	private $value;
 	private $name;
-	private $description;
 	private $modified;
 	
 	public function __construct($key,$value,$name,$description,$modified){
 		$this->key =			$key;
 		$this->value =			$value;
 		$this->name =			$name;
-		$this->description =	$description;
 		$this->modified =		$modified;
 	}
 	public function __destruct(){}
 	public function get_key(){return $this->key;}
 	public function get_value(){return $this->value;}
 	public function get_name(){return $this->name;}
-	public function get_description(){return $this->description;}
 	public function get_modified(){return $this->modified;}
 }
 
@@ -58,7 +55,7 @@ class settings {
 	public function load_settings(){
 		$settings = $this->db->query("select * from settings");
 		foreach ($settings as $key=>$setting){
-			$this->settings[$setting['key']] = new setting($setting['key'],$setting['value'],$setting['name'],$setting['description'],$setting['modified']);
+			$this->settings[$setting['key']] = new setting($setting['key'],$setting['value'],$setting['name'],$setting['modified']);
 		}
 	}
 

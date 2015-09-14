@@ -79,7 +79,6 @@ DROP TABLE IF EXISTS `settings`;
 CREATE TABLE `settings` (
   `key` varchar(64) NOT NULL DEFAULT '',
   `value` varchar(64) NOT NULL DEFAULT '',
-  `description` varchar(128) NOT NULL DEFAULT '',
   `modified` datetime NOT NULL,
   `name` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`key`)
@@ -88,11 +87,11 @@ CREATE TABLE `settings` (
 LOCK TABLES `settings` WRITE;
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 
-INSERT INTO `settings` (`key`, `value`, `description`, `modified`, `name`)
+INSERT INTO `settings` (`key`, `value`, `modified`, `name`)
 VALUES
-	('data_cost','150','Cost per TB, rounded up','2015-08-21 10:48:38','Data Cost'),
-	('min_billable_data','51200','Minimum billable data, in MB','2015-08-06 16:43:11','Min Billable Data'),
-	('small_file_size','1048576','Threshold for \'small\' file, in KB','2015-08-21 10:49:47','Small File Size');
+	('data_cost','150','2015-08-21 10:48:38','Data Cost ($/TB)'),
+	('min_billable_data','51200','2015-08-06 16:43:11','Min Billable Data (MB)'),
+	('small_file_size','1048576','2015-08-21 10:49:47','Small File Size (KB)');
 
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
