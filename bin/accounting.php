@@ -1,5 +1,5 @@
 <?php
-
+ini_set("display_errors",1);
 chdir(dirname(__FILE__));
 set_include_path(get_include_path() . ':../libs');
 function __autoload($class_name) {
@@ -40,8 +40,8 @@ else {
 			// Tally up "small" files
 			$numsmallfiles = 0;
 			foreach ( $allfiles as $key=>$file ){
-				preg_match("/^(.*)\\t/u", $file, $matches);
-				if( intval($matches[1]) < $settings->get_setting('small_file_size') ){
+				preg_match("/^(.*)\\t(.*)/u", $file, $matches);
+				if( archive_file::isSmall($db,$matches[2],$matches[1]) ){
 					$numsmallfiles += 1;
 				}
 			}

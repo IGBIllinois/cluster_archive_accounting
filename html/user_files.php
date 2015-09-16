@@ -202,7 +202,7 @@
 			var makeDirs;
 			makeDirs = function(path,root,file){
 				if(path.length == 1){
-					root.children.push({"filename":path[0],"filesize":file.filesize,'date':file.file_time,children:[]});
+					root.children.push({"filename":path[0],"filesize":file.filesize,'smallfile':file.smallfile,'date':file.file_time,children:[]});
 				} else {
 					// Check if dir exists, create if it doesn't, recurse
 					var childIndex = root.children.findin('filename',path[0]);
@@ -239,9 +239,9 @@
 					.append('<div class="filename">'+root.filename+'</div>');
 				if(root.children.length == 0){
 					// Format date
+					console.log(root);
 					var date = new Date(root.date);
 					var dateStr = padDigits(date.getMonth()+1,2)+'/'+padDigits(date.getDate(),2)+'/'+date.getFullYear(); //Date.getMonth() returns Jan=0, Feb=1, etc. Because of course it does.
-					console.log(root.date, date, dateStr);
 					
 					$node.append(' <div class="filetime">'+dateStr+'</div>');
 					
@@ -250,7 +250,7 @@
 					if(root.filesize>1024)filesize=(root.filesize/1024.0).toFixed(2)+' MB';
 					if(root.filesize>1024*1024)filesize=(root.filesize/1024.0/1024.0).toFixed(2)+' GB';
 					if(root.filesize>1024*1024*1024)filesize=(root.filesize/1024.0/1024.0/1024.0).toFixed(2)+' TB';
-					if(root.filesize < smallfilesize)filesize = "<span class='smallwarning glyphicon glyphicon-alert'></span> "+filesize;
+					if(root.smallfile)filesize = "<span class='smallwarning glyphicon glyphicon-alert'></span> "+filesize;
 					
 					$node.append(' <div class="filesize">'+filesize+'</div>');
 					
