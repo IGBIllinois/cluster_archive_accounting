@@ -165,8 +165,8 @@
 		}
 		
 		.dirnode:hover{
-			background-color:#337ab7;
-			color: white;
+			background-color:#f0f0f0;
+			color: black;
 		}
 
 		.dirindicator {
@@ -177,7 +177,13 @@
 		}
 	</style>
 	<div class="filelist">
-
+		<div class="row">
+			<div class="col-sm-8 col-sm-offset-2" style="padding:50px 0">
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped active" style="width:100%"> </div>
+				</div>
+			</div>
+		</div>
 	</div>
 	<script type="text/javascript">
 		window.onload = function(){
@@ -273,14 +279,14 @@
 			// Initializer
 			function displayFileList(jsonData){
 				if(jsonData.length==0){
-					$('.filelist').append('<p class="alert alert-warning">No files during this time period</p>');
+					$('.filelist').html('<p class="alert alert-warning">No files during this time period</p>');
 				} else {
 					for(var i=0; i<jsonData.length; i++){
 						addFile(jsonData[i]);
 					}
 					sortDir(root);
 					var $root = dirNode(root);
-					$('.filelist').append($root);
+					$('.filelist').html($root);
 				}
 			}
 			
