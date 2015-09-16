@@ -24,6 +24,8 @@
 			$data_html .= "<tr>";
 			$data_html .= "<td>".$value['Username']."</td>";
 			$data_html .= "<td>".__ARCHIVE_DIR__.$value['Directory']."</td>";
+			$data_html .= "<td>".number_format($value['Usage'],4)." TB</td>";
+			$data_html .= "<td>".number_format($value['Previous_Usage'],4)." TB</td>";
 			$data_html .= "<td>$".number_format($value['Cost'],2)."</td>";
 			$data_html .= "<td>$".number_format($value['Balance'],2)."</td>";
 			$data_html .= "<td>".$value['CFOP']."</td>";
@@ -53,6 +55,8 @@
         <tr>
 	        <th>Username</th>
             <th>Directory</th>
+            <th>Usage</th>
+            <th>Previous Usage</th>
             <th>Cost</th>
             <th>Balance</th>
             <th>CFOP</th>
@@ -60,7 +64,7 @@
     </thead>
     <?php echo $data_html; ?>
     <tr>
-        <td colspan="2">Total Cost:</td>
+        <td colspan="4">Total Cost:</td>
         <td colspan='3'>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?>
         </td>
 	</tr>
