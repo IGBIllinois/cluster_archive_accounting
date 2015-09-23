@@ -70,7 +70,7 @@ if (isset($_POST['login'])) {
 		<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 	</head>
 	<body OnLoad="document.login.username.focus();">
-		<nav class="navbar navbar-inverse">
+		<nav class="navbar navbar-inverse navbar-static-top">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<div class="navbar-brand">
