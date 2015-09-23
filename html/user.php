@@ -21,6 +21,7 @@
 			$directory_html .= "<tr class='topborder'><td>Directory:</td><td>".__ARCHIVE_DIR__.$directory->get_directory();
 			$directory_html .= "</td></tr>";
 			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>CFOP:</td><td>".$directory->get_cfop()."</td></tr>";
+			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Activity Code:</td><td>".$directory->get_activity_code()."</td></tr>";
 			$directory_html .= "<tr><td>Usage:</td><td>".number_format($usage->get_directory_size()/1048576,4)." TB</td></tr>";
 			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Balance:</td><td>$".$balance->get_balance()."</td></tr>";
 			if($login_user->is_admin() && count($directories)>1){

@@ -123,7 +123,7 @@ class user {
 			$prevyear = $prevyear - 1;
 			$prevmonth = 12;
 		}
-		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, u.cost as cost, coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, c.cfop as cfop, d.do_not_bill as do_not_bill ";
+		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, u.cost as cost, coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, c.cfop as cfop, c.activity_code, d.do_not_bill as do_not_bill ";
 		$sql .= "FROM archive_usage u ";
 		$sql .= "left join directories d on u.directory_id=d.id ";
 		$sql .= "left join cfops c on d.id=c.directory_id ";

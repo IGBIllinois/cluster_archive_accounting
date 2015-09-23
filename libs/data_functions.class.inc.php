@@ -27,7 +27,8 @@ class data_functions {
 		    where transactions.directory_id=directories.id 
 		    and ((month(transaction_time)<=:month and year(transaction_time)=:year) or year(transaction_time)<:year)
 		  ) as Balance, 
-		  cfops.cfop as CFOP 
+		  cfops.cfop as CFOP, 
+		  cfops.activity_code as Activity_Code
 		FROM archive_usage 
 		LEFT JOIN directories on archive_usage.directory_id=directories.id 
 		LEFT JOIN users ON directories.user_id=users.id 

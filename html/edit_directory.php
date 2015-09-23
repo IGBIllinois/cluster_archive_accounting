@@ -30,8 +30,8 @@
 		if($dnb==0){
 			$cfop = $_POST['cfop_1']."-".$_POST['cfop_2']."-".$_POST['cfop_3']."-".$_POST['cfop_4'];
 			if($cfop=="---")$cfop="";
-			if($directory->get_cfop() != $cfop){
-				if($directory->set_cfop($cfop)){
+			if($directory->get_cfop() != $cfop || $directory->get_activity_code() != $_POST['activity_code']){
+				if($directory->set_cfop($cfop,$_POST['activity_code'])){
 					$message .= html::success_message("CFOP successfully set");
 				}
 			}
@@ -83,6 +83,12 @@
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php echo $directory->get_cfop_organization();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php echo $directory->get_cfop_program();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?>/></div>
 				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Activity Code:</label>
+			<div class="col-sm-4">
+				<input class="form-control" type="text" name="activity_code" value="<?php echo $directory->get_activity_code();?>" />
 			</div>
 		</div>
 		<div class="form-group">

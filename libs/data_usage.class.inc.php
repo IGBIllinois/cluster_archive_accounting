@@ -41,7 +41,7 @@
 			// Add transaction if necessary
 			if($cost>0){
 				$trans = new transaction($this->db);
-				$trans->create($directory_id,$cost,$this->id);
+				$trans->create($directory_id,-1*$cost,$this->id);
 			}
 			
 			return $this;

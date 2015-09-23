@@ -80,8 +80,9 @@
 			if($value['do_not_bill']==0){
 				$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
 				$data_html .= "<td>".$value['cfop']."</td>";
+				$data_html .= "<td>".$value['activity_code']."</td>";
 			} else {
-				$data_html .= "<td colspan='2'></td>";
+				$data_html .= "<td colspan='3'></td>";
 			}
 			$data_html .= "</tr>";
 		}
@@ -128,6 +129,7 @@
 				<th>Previous Usage</th>
 				<th>Cost</th>
 				<th>CFOP</th>
+				<th>Activity Code</th>
 			</tr>
 		</thead>
 		<?php echo $data_html; ?>

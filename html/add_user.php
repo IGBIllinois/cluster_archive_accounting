@@ -46,7 +46,7 @@
 				// Add directory if needed
 				if($hasdir==1){
 					$directory = new archive_directory($db);
-					$directory->create($result['user_id'],$archive_dir,$cfop,$dnb);
+					$directory->create($result['user_id'],$archive_dir,$cfop,$_POST['activity_code'],$dnb);
 				}
 				header("Location: user.php?user_id=".$result['user_id']);
 			} else if ($result['RESULT'] == false) {
@@ -108,6 +108,12 @@
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>" <?php if( (isset($_POST['add_user'])&&!isset($_POST['has_dir'])) || isset($_POST['do_not_bill']) )echo 'disabled';?>/></div>
 				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Activity Code:</label>
+			<div class="col-sm-4">
+				<input class="form-control" type="text" name="activity_code" value="<?php if(isset($_POST['activity_code'])){echo $_POST['activity_code'];}?>" />
 			</div>
 		</div>
 		<div class="form-group">

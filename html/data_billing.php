@@ -29,6 +29,7 @@
 			$data_html .= "<td>$".number_format($value['Cost'],2)."</td>";
 			$data_html .= "<td>$".number_format($value['Balance'],2)."</td>";
 			$data_html .= "<td>".$value['CFOP']."</td>";
+			$data_html .= "<td>".$value['Activity_Code']."</td>";
 			$data_html .= "</tr>";
 // 		}
 	}
@@ -60,12 +61,13 @@
             <th>Cost</th>
             <th>Balance</th>
             <th>CFOP</th>
+            <th>Activity Code</th>
         </tr>
     </thead>
     <?php echo $data_html; ?>
     <tr>
         <td colspan="4">Total Cost:</td>
-        <td colspan='3'>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?>
+        <td colspan='4'>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?>
         </td>
 	</tr>
 </table>

@@ -22,7 +22,7 @@
 		}
 		
 		$directory = new archive_directory($db);
-		$directory->create($_POST['user_id'],$_POST['archive_dir'],$cfop,$dnb);
+		$directory->create($_POST['user_id'],$_POST['archive_dir'],$cfop,$_POST['activity_code'],$dnb);
 		header('location:user.php?user_id='.$_POST['user_id']);
 	} else if (isset($_POST['cancel_user'])){
 		unset($_POST);
@@ -76,6 +76,12 @@
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_3" maxlength="6" oninput="cfop_advance(3)" value="<?php if (isset($_POST['cfop_3'])){echo $_POST['cfop_1'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
 					<div class="col-sm-3 cfop"><input class="form-control" type="text" name="cfop_4" maxlength="6" value="<?php if (isset($_POST['cfop_1'])){echo $_POST['cfop_4'];}?>" <?php if(isset($_POST['do_not_bill'])){echo 'disabled';}?>/></div>
 				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Activity Code:</label>
+			<div class="col-sm-4">
+				<input class="form-control" type="text" name="activity_code" value="<?php if(isset($_POST['activity_code'])){echo $_POST['activity_code'];}?>" />
 			</div>
 		</div>
 		<div class="form-group">

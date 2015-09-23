@@ -7,6 +7,7 @@
 		private $time_created;
 		private $cfop;
 		private $cfop_id;
+		private $activity_code;
 		private $enabled;
 		private $do_not_bill;
 		
@@ -15,7 +16,7 @@
 		}
 		public function __destruct(){}
 		
-		public function create($user_id,$directory,$cfop,$dnb){
+		public function create($user_id,$directory,$cfop,$activity_code,$dnb){
 			// TODO add a bit of error-checking
 			if(self::is_disabled($this->db,$directory)){
 				// Re-enable if disabled.
@@ -29,12 +30,12 @@
 				$sql = "insert into directories (user_id,directory,time_created,is_enabled,do_not_bill) values (:userid,:directory,NOW(),1,:dnb)";
 				$args = array(':userid'=>$user_id,':directory'=>$directory,':dnb'=>$dnb);
 				$this->id = $this->db->insert_query($sql,$args);
-				$this->set_cfop($cfop);
+				$this->set_cfop($cfop,$activity_code);
 				$this->load_by_id($this->id);
 			}
 		}
 		public function load_by_id($id){
-			$sql = "select d.*, c.cfop, c.id as cfop_id from directories d left join cfops c on d.id=c.directory_id where d.id = :id and c.active=1 limit 1";
+			$sql = "select d.*, c.cfop, c.id as cfop_id, c.activity_code from directories d left join cfops c on d.id=c.directory_id where d.id = :id and c.active=1 limit 1";
 			$args = array(':id'=>$id);
 			$results = $this->db->query($sql,$args);
 			$this->id =				$results[0]['id'];
@@ -43,6 +44,7 @@
 			$this->time_created =	$results[0]['time_created'];
 			$this->cfop =			$results[0]['cfop'];
 			$this->cfop_id =		$results[0]['cfop_id'];
+			$this->activity_code =	$results[0]['activity_code'];
 			$this->enabled =		$results[0]['is_enabled'];
 			$this->do_not_bill =	$results[0]['do_not_bill'];
 		}
@@ -69,6 +71,9 @@
 		}
 		public function get_cfop_program(){
 			return substr($this->get_cfop(),16,6);
+		}
+		public function get_activity_code(){
+			return $this->activity_code;
 		}
 		public function get_do_not_bill() {
 			return $this->do_not_bill;
@@ -123,17 +128,18 @@
 			return $result;
 		}
 		
-		public function set_cfop($cfop){
+		public function set_cfop($cfop,$activity=''){
 			$sql = "update cfops set active=0 where directory_id=:id";
 			$args = array(':id'=>$this->id);
 			$this->db->non_select_query($sql,$args);
 			
-			$sql = "insert into cfops (directory_id,cfop,active,time_created) values (:dirid,:cfop,1,NOW())";
-			$args = array(':dirid'=>$this->id,':cfop'=>$cfop);
+			$sql = "insert into cfops (directory_id,cfop,activity_code,active,time_created) values (:dirid,:cfop,:activitycode,1,NOW())";
+			$args = array(':dirid'=>$this->id,':cfop'=>$cfop,':activitycode'=>$activity);
 			$result = $this->db->insert_query($sql,$args);
 			
 			$this->cfop = $cfop;
 			$this->cfop_id = $result;
+			$this->activity_code = $activity;
 			
 			return $result>0;
 		}
