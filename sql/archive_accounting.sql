@@ -47,6 +47,7 @@ CREATE TABLE `cfops` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `directory_id` int(11) unsigned NOT NULL,
   `cfop` varchar(64) NOT NULL DEFAULT '',
+  `activity_code` varchar(16) DEFAULT NULL,
   `active` int(11) NOT NULL,
   `time_created` datetime NOT NULL,
   PRIMARY KEY (`id`)
