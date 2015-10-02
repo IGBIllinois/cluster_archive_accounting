@@ -88,7 +88,7 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Activity Code:</label>
 			<div class="col-sm-4">
-				<input class="form-control" type="text" name="activity_code" value="<?php echo $directory->get_activity_code();?>" />
+				<input class="form-control" type="text" name="activity_code" value="<?php echo $directory->get_activity_code();?>" <?php if($directory->get_do_not_bill()!=0){echo 'disabled';}?> />
 			</div>
 		</div>
 		<div class="form-group">
