@@ -169,6 +169,12 @@ class user {
 		$this->enabled = false;
 		$this->db->non_select_query($sql,$args);
 		
+		// Also disable user's directories
+		$dirs = $this->get_directories();
+		foreach($dirs as $dir){
+			$dir->disable();
+		}
+		
 		$message = "User successfully deleted";
 		return array('RESULT'=>true,'MESSAGE'=>$message);
 	}
