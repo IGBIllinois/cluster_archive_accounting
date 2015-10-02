@@ -24,6 +24,16 @@
 			$id = $this->db->insert_query($sql,$args);
 			$this->get_transaction($id);
 		}
+		public function update($amount){
+			$sql = "update transactions set amount=:amount,transaction_time=NOW() where id=:id";
+			$args = array(':amount'=>$amount,':id'=>$this->id);
+			$this->db->non_select_query($sql,$args);
+		}
+		public function delete(){
+			$sql = "delete from transactions where id=:id limit 1";
+			$args = array(':id'=>$this->id);
+			$this->db->non_select_query($sql,$args);
+		}
 		
 		// Returns the latest transaction in the database for the given user
 		public static function latestTransaction($db,$directory_id){
@@ -66,5 +76,13 @@
 			$this->amount = $transaction[0]['amount'];
 			$this->usage_id = $transaction[0]['usage_id'];
 			$this->transaction_time = $transaction[0]['transaction_time'];
+		}
+		public function get_transaction_with_usage_id($usage_id){
+			$sql = "select t.id from transactions t where usage_id=:usageid limit 1";
+			$args = array(':usageid'=>$usage_id);
+			$transaction = $this->db->query($sql,$args);
+			if(count($transaction)==1){
+				$this->get_transaction($transaction[0]['id']);
+			}
 		}
 	}

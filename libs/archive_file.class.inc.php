@@ -6,7 +6,6 @@
 	// Represents the database entry for a file in a user's archive, as scanned at the given time.
 	class archive_file {
 		private $db;
-		private $id;
 		private $filename;
 		private $filesize;
 		private $usage_id;
@@ -22,18 +21,17 @@
 		public function create($filename,$filesize,$usage_id,$file_time){
 			$sql = "insert into archive_files (filename,filesize,usage_id,file_time) values (:filename,:filesize,:usageid,:filetime)";
 			$args = array(':filename'=>$filename,':filesize'=>$filesize,':usageid'=>$usage_id,':filetime'=>$file_time);
-			$this->id = $this->db->insert_query($sql,$args);
+			$this->db->insert_query($sql,$args);
 			
-			$this->load_by_id($this->id);
+			$this->load($filename,$usage_id);
 		}
 		
 		// Load file info from a given id from the database into this object
-		public function load_by_id($id){
-			$sql = "select * from archive_files where id=:id";
-			$args = array(':id'=>$id);
+		public function load($filename,$usage_id){
+			$sql = "select * from archive_files where filename=:filename and usage_id=:usageid";
+			$args = array(':filename'=>$filename,':usageid'=>$usage_id);
 			$result = $this->db->query($sql,$args);
 			
-			$this->id =			$result[0]['id'];
 			$this->filename =	$result[0]['filename'];
 			$this->filesize =	$result[0]['filesize'];
 			$this->usage_id =	$result[0]['usage_id'];
