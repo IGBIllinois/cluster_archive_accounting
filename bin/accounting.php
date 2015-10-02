@@ -29,7 +29,7 @@ else {
 			echo __ARCHIVE_DIR__.$row['directory']."... ";
 			// Gather usage info
 			// Total Usage in MB
-			$usage = exec("du -am ".__ARCHIVE_DIR__.$row['directory']);
+			$usage = exec("du -sm ".__ARCHIVE_DIR__.$row['directory']);
 			preg_match("/^(.*)\\t/u", $usage, $matches);
 			$usage = $matches[1];
 			
@@ -48,6 +48,11 @@ else {
 			
 			// Store usage data in database
 			$data_usage->create($row['id'],$usage,$numsmallfiles);
+			echo $usage.' MB, '.count($allfiles)." files... ";
+			// Remove existing file records
+			$sql = "delete from archive_files where usage_id=:usageid";
+			$args = array(':usageid'=>$data_usage->get_id());
+			$db->non_select_query($sql,$args);
 			foreach ( $allfiles as $key=>$file ){
 				preg_match("/^(.*)\\t(.*)/u", $file, $matches);
 				// Get date modified info for each file and save to database
@@ -60,7 +65,7 @@ else {
 				// Store file info in database
 				$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 			}
-			echo $usage.' MB, '.count($allfiles)." files.\n";
+			echo "Done.\n";
 			log::log_message("Scanned ".__ARCHIVE_DIR__.$row['directory'].': '.$usage.' MB, '.count($allfiles).' files.');
 		} else {
 			log::log_message("Directory ".__ARCHIVE_DIR__.$row['directory'].' does not exit.');
