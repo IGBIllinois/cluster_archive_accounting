@@ -35,3 +35,12 @@ function bill_toggle(e){
 	document.forms["form"]["cfop_4"].disabled = dnb;
 	document.forms["form"]["activity_code"].disabled = dnb;
 }
+
+function pretty_filesize(filesize){
+	var sizestr = filesize+' KB';
+	if(filesize>1024)sizestr=(filesize/1024.0).toFixed(2)+' MB';
+	if(filesize>1024*1024)sizestr=(filesize/1024.0/1024.0).toFixed(2)+' GB';
+	if(filesize>1024*1024*1024)sizestr=(filesize/1024.0/1024.0/1024.0).toFixed(2)+' TB';
+	
+	return sizestr;
+}

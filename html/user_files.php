@@ -176,6 +176,14 @@
 			color: #f0ac4c;
 		}
 	</style>
+	<div class="row">
+		<div class="col-sm-6">
+			<div id="size_chart_div"></div>
+		</div>
+		<div class="col-sm-6">
+			<div id="count_chart_div"></div>
+		</div>
+	</div>
 	<div class="filelist">
 		<div class="row">
 			<div class="col-sm-8 col-sm-offset-2" style="padding:50px 0">
@@ -186,10 +194,12 @@
 		</div>
 	</div>
 	<script type="text/javascript">
+		google.load('visualization', '1.1', {'packages':['corechart']});
 		window.onload = function(){
 			var basedir = '<?php echo __ARCHIVE_DIR__.$directory->get_directory();?>';
 			var root = {"filename":"<?php echo $directory->get_directory();?>","filesize":0,children:[]};
 			var smallfilesize = <?php echo $settings->get_setting('small_file_size'); ?>;
+			var digest = {'size':{},'count':{}};
 
 			// Helpers			
 			Array.prototype.findin = function(field,value){
@@ -244,25 +254,33 @@
 				var $node = $('<div class="dirnode"></div>')
 					.append('<div class="filename">'+root.filename+'</div>');
 				if(root.children.length == 0){
+					// Leaf node; File
 					// Format date
-					console.log(root);
 					var date = new Date(root.date);
 					var dateStr = padDigits(date.getMonth()+1,2)+'/'+padDigits(date.getDate(),2)+'/'+date.getFullYear(); //Date.getMonth() returns Jan=0, Feb=1, etc. Because of course it does.
 					
 					$node.append(' <div class="filetime">'+dateStr+'</div>');
 					
 					//Format file size
-					var filesize = root.filesize+' KB';
-					if(root.filesize>1024)filesize=(root.filesize/1024.0).toFixed(2)+' MB';
-					if(root.filesize>1024*1024)filesize=(root.filesize/1024.0/1024.0).toFixed(2)+' GB';
-					if(root.filesize>1024*1024*1024)filesize=(root.filesize/1024.0/1024.0/1024.0).toFixed(2)+' TB';
+					var filesize = pretty_filesize(root.filesize);
 					if(root.smallfile)filesize = "<span class='smallwarning glyphicon glyphicon-alert'></span> "+filesize;
 					
 					$node.append(' <div class="filesize">'+filesize+'</div>');
 					
 					$node.addClass('file');
 					$node.prepend('<span class="dirindicator glyphicon glyphicon-file"></span> ');
+					
+					// Add digest info
+					var split = root.filename.split('.');
+					var extension = split[split.length-1].toLowerCase();
+					if(! (extension in digest.size) ){
+						digest.size[extension] = 0;
+						digest.count[extension] = 0;
+					}
+					digest.size[extension] += parseInt(root.filesize);
+					digest.count[extension] += 1;
 				} else {
+					// Directory
 					$node.addClass('open');
 					$node.prepend('<span class="dirindicator glyphicon glyphicon-folder-open"></span> ');
 				}
@@ -276,6 +294,28 @@
 				return $node;
 			}
 			
+			function initGraphs(){
+				
+				
+				var sizeGraph  = {'cols':[{'label':'Extension','type':'string'},{'label':'Usage','type':'number'}],rows:[]};
+				var countGraph = {'cols':[{'label':'Extension','type':'string'},{'label':'Count','type':'number'}],rows:[]};
+				var keys = Object.keys(digest.size);
+				for(var ext in digest.size){
+					sizeGraph.rows.push({'c':[{'v':ext},{'v':digest.size[ext],'f':pretty_filesize(digest.size[ext])}]});
+				}
+				console.log(sizeGraph);
+				var sizeData = new google.visualization.DataTable(sizeGraph);
+				var sizeChart = new google.visualization.PieChart(document.getElementById('size_chart_div'));
+				sizeChart.draw(sizeData,{height:400,title:'Size by extension',pieHole:0.5})
+				
+				for(var ext in digest.count){
+					countGraph.rows.push({'c':[{'v':ext},{'v':digest.count[ext]}]});
+				}
+				var countData = new google.visualization.DataTable(countGraph);
+				var countChart = new google.visualization.PieChart(document.getElementById('count_chart_div'));
+				countChart.draw(countData,{height:400,title:'Count by extension',pieHole:0.5});
+			}
+			
 			// Initializer
 			function displayFileList(jsonData){
 				if(jsonData.length==0){
@@ -287,6 +327,7 @@
 					sortDir(root);
 					var $root = dirNode(root);
 					$('.filelist').html($root);
+					initGraphs();
 				}
 			}
 			
