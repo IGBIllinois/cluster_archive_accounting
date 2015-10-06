@@ -301,19 +301,37 @@
 				var countGraph = {'cols':[{'label':'Extension','type':'string'},{'label':'Count','type':'number'}],rows:[]};
 				var keys = Object.keys(digest.size);
 				for(var ext in digest.size){
-					sizeGraph.rows.push({'c':[{'v':ext},{'v':digest.size[ext],'f':pretty_filesize(digest.size[ext])}]});
+					sizeGraph.rows.push({'c':[{'v':'.'+ext},{'v':digest.size[ext],'f':pretty_filesize(digest.size[ext])}]});
 				}
-				console.log(sizeGraph);
 				var sizeData = new google.visualization.DataTable(sizeGraph);
 				var sizeChart = new google.visualization.PieChart(document.getElementById('size_chart_div'));
-				sizeChart.draw(sizeData,{height:400,title:'Size by extension',pieHole:0.5})
+				var sizeOptions = {height:400,title:'Size by extension',pieHole:0.5,tooltip:{trigger:'selection'}};
+				sizeChart.draw(sizeData,sizeOptions);
+				google.visualization.events.addListener(sizeChart,'onmouseover',function(entry){
+					sizeChart.setSelection([{row:entry.row}]);
+				});
+				google.visualization.events.addListener(sizeChart, 'onmouseout', function(entry) {
+					sizeChart.setSelection([]);
+				});
 				
 				for(var ext in digest.count){
-					countGraph.rows.push({'c':[{'v':ext},{'v':digest.count[ext]}]});
+					countGraph.rows.push({'c':[{'v':'.'+ext},{'v':digest.count[ext]}]});
 				}
 				var countData = new google.visualization.DataTable(countGraph);
 				var countChart = new google.visualization.PieChart(document.getElementById('count_chart_div'));
-				countChart.draw(countData,{height:400,title:'Count by extension',pieHole:0.5});
+				var countOptions = {height:400,title:'Count by extension',pieHole:0.5,tooltip:{trigger:'selection'}};
+				countChart.draw(countData,countOptions);
+				google.visualization.events.addListener(countChart,'onmouseover',function(entry){
+					countChart.setSelection([{row:entry.row}]);
+				});
+				google.visualization.events.addListener(countChart, 'onmouseout', function(entry) {
+					countChart.setSelection([]);
+				});
+				
+				$(window).resize(function(){
+			    	sizeChart.draw(sizeData,sizeOptions);
+			    	countChart.draw(countData,countOptions);
+			    });
 			}
 			
 			// Initializer

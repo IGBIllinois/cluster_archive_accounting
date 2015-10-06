@@ -87,30 +87,9 @@
 		</tr>
 	</tbody>
 </table>
+<script type="text/javascript" src="includes/graph.inc.js"></script>
 <script type="text/javascript">
-	// Load visualization API
-	google.load('visualization', '1.0', {'packages':['corechart']});
-	google.setOnLoadCallback(drawChart);
-	
-	function drawChart(){
-		$.ajax({
-			url: "graph.php?<?php echo http_build_query($get_array);?>",
-			dataType: "json",
-			success: function(jsonData){
-				var data = new google.visualization.DataTable(jsonData);
-		
-				var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-				chart.draw(data,{height: 600,hAxis:{showTextEvery:1,slantedText:true}});
-				$(window).resize(function(){
-					console.log("resize");
-			        chart.draw(data,{height: 600,hAxis:{showTextEvery:1,slantedText:true}});
-			    });
-			},
-			error: function(jsonData){
-				console.log(jsonData.responseText);
-			}
-		});
-	}			
+	google.setOnLoadCallback(function(){drawChart("graph.php?<?php echo http_build_query($get_array);?>");});
 </script>
 <div id="chart_div"></div>
 <?php

@@ -174,7 +174,7 @@
 	}
 	else if($graph_type=='top_usage_users'){
 		$stats = new statistics($db);
-		$data = $stats->get_top_usage_users($start_date,$end_date,8);
+		$data = $stats->get_top_usage_users($start_date,$end_date);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Directory","type"=>"string"),array("label"=>"Usage (TB)","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -190,7 +190,7 @@
 	}
 	else if($graph_type=='top_delta_usage_users'){
 		$stats = new statistics($db);
-		$data = $stats->get_top_delta_usage_users($start_date,$end_date,8);
+		$data = $stats->get_top_delta_usage_users($start_date,$end_date);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Directory","type"=>"string"),array("label"=>"∆ Usage (TB)","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -208,7 +208,7 @@
 	}
 	else if($graph_type=='top_cost_users'){
 		$stats = new statistics($db);
-		$data = $stats->get_top_cost_users($start_date,$end_date,8);
+		$data = $stats->get_top_cost_users($start_date,$end_date);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Directory","type"=>"string"),array("label"=>"Cost","type"=>"number") );
 		$jsonData['rows'] = array();
@@ -224,7 +224,7 @@
 	}
 	else if($graph_type=='top_smallfiles_users'){
 		$stats = new statistics($db);
-		$data = $stats->get_top_smallfiles_users($start_date,$end_date,8);
+		$data = $stats->get_top_smallfiles_users($start_date,$end_date);
 		$jsonData = array();
 		$jsonData['cols'] = array( array("label"=>"Directory","type"=>"string"),array("label"=>"# of small files","type"=>"number") );
 		$jsonData['rows'] = array();

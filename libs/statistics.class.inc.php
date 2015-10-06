@@ -143,111 +143,35 @@
 		}
 		
 		// Returns the top $top users by usage between the given dates
-		public function get_top_usage_users($start_date,$end_date,$top){
+		public function get_top_usage_users($start_date,$end_date){
 			$sql = "select round(max(directory_size)/1048576,4) as total_usage, concat(username,' - ',:basedir,directory) as username from archive_usage left join directories on directory_id=directories.id left join users on user_id=users.id where date(usage_time) between :start and :end group by directory order by total_usage desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date,':basedir'=>__ARCHIVE_DIR__);
 			$allusage = $this->db->query($sql,$args);
-			$top_usage = 0;
-			if(count($allusage)>$top){
-				$total_usage=0;
-				$i=0;
-				foreach($allusage as $usage){
-					if($i<$top){
-						$top_usage += $usage['total_usage'];
-					}
-					$total_usage += $usage['total_usage'];
-					$i++;
-				}
-				$result = array_slice($allusage,0,$top,true);
-				if($total_usage - $top_usage>0){
-					$result[$top]['username'] = "Other";
-					$result[$top]['total_usage'] = $total_usage - $top_usage;
-				}
-			} else {
-				$result = $allusage;
-			}
-			return $result;
+			return $allusage;
 		}
 		
 		// Returns the top $top users by change in usage between the given dates
-		public function get_top_delta_usage_users($start_date,$end_date,$top){
+		public function get_top_delta_usage_users($start_date,$end_date){
 			$sql = "select ( coalesce((select `directory_size` from archive_usage where date(usage_time)<=:end and directory_id=u.directory_id order by usage_time desc limit 1),0)-coalesce((select directory_size from archive_usage where date(usage_time)<=:start and directory_id=u.directory_id order by usage_time desc limit 1),0) )/1048576 as total_delta, concat(a.username,' - ',:basedir,d.directory) as username from archive_usage u left join directories d on u.directory_id=d.id left join users a on a.id=d.user_id group by d.id order by total_delta desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date,':basedir'=>__ARCHIVE_DIR__);
 			$alldelta = $this->db->query($sql,$args);
-			$top_delta = 0;
-			if(count($alldelta)>$top){
-				$total_delta=0;
-				$i=0;
-				foreach($alldelta as $delta){
-					if($i<$top){
-						$top_delta += $delta['total_delta'];
-					}
-					$total_delta += $delta['total_delta'];
-					$i++;
-				}
-				$result = array_slice($alldelta,0,$top,true);
-				if($total_delta - $top_delta>0){
-					$result[$top]['username'] = "Other";
-					$result[$top]['total_delta'] = $total_delta - $top_delta;
-				}
-			} else {
-				$result = $alldelta;
-			}
-			return $result;
+			return $alldelta;
 		}
 		
 		// Returns the top $top users by cost incurred between the given dates
-		public function get_top_cost_users($start_date,$end_date,$top){
+		public function get_top_cost_users($start_date,$end_date){
 			$sql = "select sum(cost) as total_cost, concat(username,' - ',:basedir,directory) as username from archive_usage left join directories on directory_id=directories.id left join users on user_id=users.id where date(usage_time) between :start and :end group by directory order by total_cost desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date,':basedir'=>__ARCHIVE_DIR__);
 			$allcost = $this->db->query($sql,$args);
-			$top_cost = 0;
-			if(count($allcost)>$top){
-				$total_cost=0;
-				$i=0;
-				foreach($allcost as $cost){
-					if($i<$top){
-						$top_cost += $cost['total_cost'];
-					}
-					$total_cost += $cost['total_cost'];
-					$i++;
-				}
-				$result = array_slice($allcost,0,$top,true);
-				if($total_cost - $top_cost > 0){
-					$result[$top]['username'] = "Other";
-					$result[$top]['total_cost'] = $total_cost - $top_cost;
-				}
-			} else {
-				$result = $allcost;
-			}
-			return $result;
+			return $allcost;
 		}
 		
 		// Returns the top $top users by number of 'small' files present between the given dates
-		public function get_top_smallfiles_users($start_date,$end_date,$top){
+		public function get_top_smallfiles_users($start_date,$end_date){
 			$sql = "select max(num_small_files) as total_smallfiles, concat(username,' - ',:basedir,directory) as username from archive_usage left join directories on directory_id=directories.id left join users on user_id=users.id where date(usage_time) between :start and :end group by directory order by total_smallfiles desc";
 			$args = array(":start"=>$start_date,":end"=>$end_date,':basedir'=>__ARCHIVE_DIR__);
 			$allsmallfiles = $this->db->query($sql,$args);
-			$top_smallfiles = 0;
-			if(count($allsmallfiles)>$top){
-				$total_smallfiles=0;
-				$i=0;
-				foreach($allsmallfiles as $smallfiles){
-					if($i<$top){
-						$top_smallfiles += $smallfiles['total_smallfiles'];
-					}
-					$total_smallfiles += $smallfiles['total_smallfiles'];
-					$i++;
-				}
-				$result = array_slice($allsmallfiles,0,$top,true);
-				if($total_smallfiles - $top_smallfiles > 0){
-					$result[$top]['username'] = "Other";
-					$result[$top]['total_smallfiles'] = $total_smallfiles - $top_smallfiles;
-				}
-			} else {
-				$result = $allsmallfiles;
-			}
-			return $result;
+			return $allsmallfiles;
 		}
 		
 		// Takes a list of data and formats it for use with google charts, with month names and column headers
