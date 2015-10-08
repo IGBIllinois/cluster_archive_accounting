@@ -233,13 +233,70 @@ class user {
         }
 
     }
+    
+    public function email_bill($admin_email,$start_date=0,$end_date=0){
+	    if(($start_date==0) && ($end_date==0)){
+		    $end_date = date('Ymd',strtotime('-1 second',strtotime(date('Ym').'01')));
+		    $start_date = substr($end_date,0,4).substr($end_date,4,2).'01';
+	    }
+	    $month = date('m',strtotime($start_date));
+	    $year = date('Y',strtotime($start_date));
+	    
+	    $subject = "Archive Accounting Bill = ".html::get_pretty_date($start_date)."-".html::get_pretty_date($end_date);
+	    $to = $this->get_email();
+	    $message = "<p>Archive Accounting Bill - ".html::get_pretty_date($start_date)."-".html::get_pretty_date($end_date)."</p>";
+	    $message .= "<br>Name: ".$this->get_name();
+	    $message .= "<br>Username: ".$this->get_username();
+	    $message .= "<br>Start Date: ".html::get_pretty_date($start_date);
+	    $message .= "<br>End Date: ".html::get_pretty_date($end_date);
+	    $message .= "<p>Below is your bill. You can go to https://biocluster.igb.illinois.edu/archive-accounting/ to view a detailed list of your archive.</p>";
+	    $message .= "<p>Archive Usage</p>";
+	    $message .= $this->get_data_table($month,$year);
+	    
+	    $headers = "From: ".$admin_email."\r\n";
+	    $headers .= "Content-Type: text/html; charset=iso-8859-1"."\r\n";
+	    echo "mail to ".$to."\n";
+	    //mail($to,$subject,$message,$headers," -f ".$admin_email);
+    }
+
+	public function get_data_table($month,$year){
+		$data_summary = $this->get_data_summary($month,$year);
+		$data_html = "<p><table border='1'>";
+		if(count($data_summary)){
+			$data_html .= "<tr><td>Directory</td>";
+			$data_html .= "<td>Usage</td>";
+			$data_html .= "<td>Previous Usage</td>";
+			$data_html .= "<td>Cost</td>";
+			$data_html .= "<td>CFOP</td>";
+			$data_html .= "<td>Activity Code</td>";
+			$data_html .= "</tr>";
+			foreach($data_summary as $data){
+				$data_html .= "<tr>";
+				$data_html .= "<td>".$data['directory']."</td>";
+				$data_html .= "<td>".$data['terabytes']."</td>";
+				$data_html .= "<td>".$data['prevusage']."</td>";
+				if($data['do_not_bill']==0){
+					$data_html .= "<td>".$data['cost']."</td>";
+					$data_html .= "<td>".$data['cfop']."</td>";
+					$data_html .= "<td>".$data['activity_code']."</td>";
+				} else {
+					$data_html .= "<td colspan='3'></td>";
+				}
+				$data_html .= "</tr>";
+			}
+		} else {
+			$data_html .= "<tr><td>No Data Usage</td></tr>";
+		}
+		$data_html .= "</table></p>";
+		return $data_html;
+	}
 
 	//////////////////Private Functions//////////
-	private function load_by_id($id) {
+	public function load_by_id($id) {
 		$this->id = $id;
 		$this->get_user();
 	}
-	private function load_by_username($username) {
+	public function load_by_username($username) {
 		$sql = "SELECT id FROM users WHERE username = :username LIMIT 1";
 		$args = array(':username'=>$username);
 		$result = $this->db->query($sql,$args);

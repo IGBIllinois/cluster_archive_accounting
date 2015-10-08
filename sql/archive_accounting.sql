@@ -33,6 +33,7 @@ CREATE TABLE `archive_usage` (
   `num_small_files` int(11) NOT NULL DEFAULT '0',
   `usage_time` datetime NOT NULL,
   `cost` varchar(16) NOT NULL DEFAULT '0',
+  `pending` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

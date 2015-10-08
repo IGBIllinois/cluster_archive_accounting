@@ -3,10 +3,12 @@
 	class data_usage {
 		private $db;
 		private $id;
+		private $directory_id;
 		private $time_created;
 		private $directory_size; // In MB
 		private $num_small_files; // < 1GB
 		private $cost;
+		private $pending;
 		
 		public function __construct($db,$id = 0) {
 			$this->db = $db;
@@ -67,7 +69,7 @@
 			} else {
 				// Create new usage
 				// Save info to database
-				$sql = "insert into `archive_usage` (`directory_id`,`directory_size`,`num_small_files`,`usage_time`,`cost`) values (:dirid,:usage,:smallfiles,NOW(),:cost)";
+				$sql = "insert into `archive_usage` (`directory_id`,`directory_size`,`num_small_files`,`usage_time`,`cost`,`pending`) values (:dirid,:usage,:smallfiles,NOW(),:cost,1)";
 				$args = array(':dirid'=>$directory_id,':usage'=>$usage,':smallfiles'=>$num_small_files,':cost'=>$cost);
 				$this->id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($this->id);
@@ -138,11 +140,13 @@
 			$sql = "select * from archive_usage where id=:id";
 			$args = array(':id'=>$id);
 			$data = $this->db->query($sql,$args);
-			$this->id = $data[0]['id'];
-			$this->time_created = $data[0]['usage_time'];
-			$this->directory_size = $data[0]['directory_size'];
-			$this->num_small_files = $data[0]['num_small_files'];
-			$this->cost = $data[0]['cost'];
+			$this->id =					$data[0]['id'];
+			$this->directory_id =		$data[0]['directory_id'];
+			$this->time_created =		$data[0]['usage_time'];
+			$this->directory_size =		$data[0]['directory_size'];
+			$this->num_small_files =	$data[0]['num_small_files'];
+			$this->cost =				$data[0]['cost'];
+			$this->pending =			$data[0]['pending'];
 		}
 		
 		public function get_id(){
@@ -156,6 +160,21 @@
 		}
 		public function get_directory_size(){
 			return $this->directory_size;
+		}
+		public function get_pending(){
+			return $this->pending;
+		}
+		public function get_directory_id(){
+			return $this->directory_id;
+		}
+		
+		public function set_pending($pending){
+			if($this->pending != $pending){
+				$sql = "update archive_usage set pending=:pending where id=:id";
+				$args = array(':pending'=>$pending,':id'=>$this->id);
+				$this->db->non_select_query($sql,$args);
+				$this->pending = $pending;
+			}
 		}
 	
 	}

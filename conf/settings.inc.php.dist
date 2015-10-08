@@ -25,6 +25,7 @@ define("__LDAP_BIND_PASS__","");
 define("__LDAP_SSL__",FALSE);
 define("__LDAP_PORT__",389);
 
+define("__ADMIN_EMAIL__","");
 define("__SESSION_NAME__","archive_accounting");
 define("__SESSION_TIMEOUT__",3600);
  
