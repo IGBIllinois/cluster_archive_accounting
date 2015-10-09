@@ -123,15 +123,25 @@ class user {
 			$prevyear = $prevyear - 1;
 			$prevmonth = 12;
 		}
-		$sql = "SELECT d.directory, ROUND(u.directory_size/1048576,4) as terabytes, u.num_small_files, u.usage_time, u.cost as cost, coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, c.cfop as cfop, c.activity_code, d.do_not_bill as do_not_bill ";
-		$sql .= "FROM archive_usage u ";
-		$sql .= "left join directories d on u.directory_id=d.id ";
-		$sql .= "left join cfops c on d.id=c.directory_id ";
-		$sql .= "WHERE d.user_id=:id ";
-		$sql .= "and c.active=1 ";
-		$sql .= "AND YEAR(u.`usage_time`)=:year ";
-        $sql .= "AND MONTH(u.`usage_time`)=:month ";
-        $sql .= "order by u.usage_time";
+		$sql = "SELECT 
+					d.directory, 
+					ROUND(u.directory_size/1048576,4) as terabytes, 
+					u.num_small_files, 
+					u.usage_time, 
+					u.cost as cost, 
+					coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, 
+					(select sum(t1.amount) from transactions t1 where (year(t1.transaction_time)<:year or (year(t1.transaction_time)=:year and month(t1.transaction_time)<:month)) and t1.directory_id=d.id) as balance, 
+					c.cfop as cfop, 
+					c.activity_code, 
+					d.do_not_bill as do_not_bill 
+				FROM archive_usage u 
+				left join directories d on u.directory_id=d.id 
+				left join cfops c on d.id=c.directory_id 
+				WHERE d.user_id=:id 
+				and c.active=1 
+				AND YEAR(u.`usage_time`)=:year 
+				AND MONTH(u.`usage_time`)=:month 
+				order by u.usage_time";
         $args = array(':id'=>$this->get_user_id(),':year'=>$year,':month'=>$month,':prevyear'=>$prevyear,':prevmonth'=>$prevmonth);
         return $this->db->query($sql,$args);
 	}
@@ -267,6 +277,7 @@ class user {
 			$data_html .= "<td>Usage</td>";
 			$data_html .= "<td>Previous Usage</td>";
 			$data_html .= "<td>Cost</td>";
+			$data_html .= "<td>Balance</td>";
 			$data_html .= "<td>CFOP</td>";
 			$data_html .= "<td>Activity Code</td>";
 			$data_html .= "</tr>";
@@ -276,11 +287,12 @@ class user {
 				$data_html .= "<td>".$data['terabytes']."</td>";
 				$data_html .= "<td>".$data['prevusage']."</td>";
 				if($data['do_not_bill']==0){
-					$data_html .= "<td>".$data['cost']."</td>";
+					$data_html .= "<td>".number_format($data['cost'])."</td>";
+					$data_html .= "<td>".number_format($data['balance'])."</td>";
 					$data_html .= "<td>".$data['cfop']."</td>";
 					$data_html .= "<td>".$data['activity_code']."</td>";
 				} else {
-					$data_html .= "<td colspan='3'></td>";
+					$data_html .= "<td colspan='4'></td>";
 				}
 				$data_html .= "</tr>";
 			}
