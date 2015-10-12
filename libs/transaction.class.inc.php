@@ -18,9 +18,14 @@
 		public function __destruct(){}
 		
 		// Inserts a transaction with the given values into the database, then loads that transaction into this object
-		public function create($directory_id,$amount,$usage_id){
-			$sql = "insert into transactions (directory_id,amount,usage_id,transaction_time) values (:dirid,:amount,:usageid,NOW())";
-			$args = array(':dirid'=>$directory_id,':amount'=>$amount,':usageid'=>$usage_id);
+		public function create($directory_id,$amount,$usage_id,$date=''){
+			if($date == ''){
+				$sql = "insert into transactions (directory_id,amount,usage_id,transaction_time) values (:dirid,:amount,:usageid,NOW())";
+				$args = array(':dirid'=>$directory_id,':amount'=>$amount,':usageid'=>$usage_id);
+			} else {
+				$sql = "insert into transactions (directory_id,amount,usage_id,transaction_time) values (:dirid,:amount,:usageid,:time)";
+				$args = array(':dirid'=>$directory_id,':amount'=>$amount,':usageid'=>$usage_id,':time'=>$date);
+			}
 			$id = $this->db->insert_query($sql,$args);
 			$this->get_transaction($id);
 		}

@@ -14,9 +14,22 @@
 			$message = html::error_message("Invalid amount.");
 		} else {
 			$trans = new transaction($db);
-			$trans->create($_POST['directory_id'],$_POST['amount'],null);
+			if($_POST['dateselect']==0){
+				$trans->create($_POST['directory_id'],$_POST['amount'],null);
+			} else {
+				$date = date_parse($_POST['date']);
+				if($date == false){
+					$message = html::error_message("Invalid date format");
+				} else {
+					foreach($date as &$val){
+						if($val==false)$val = 0;
+					}
+					$mysql_date = $date['year']."-".$date['month']."-".$date['day']." ".$date['hour'].":".$date['minute'].":".$date['second'];
+					$trans->create($_POST['directory_id'],$_POST['amount'],null,$mysql_date);
+				}
+			}
 			log::log_message("Transaction ".$trans->get_id()." added to database by user ".$login_user->get_username());
-			$message = html::error_message("Transaction logged.");
+			$message = html::success_message("Transaction logged.");
 		}
 	}
 
@@ -34,7 +47,7 @@
 		$user_list_html .= "</select>";
 	}
 	?>
-	<form class="form-horizontal" action="log_transaction.php" method="post">
+	<form class="form-horizontal" action="log_transaction.php" method="post" name="form">
 		<fieldset>
 			<legend>Log Transaction</legend>
 			<div class="form-group">
@@ -53,13 +66,29 @@
 				</div>
 			</div>
 			<div class="form-group">
+				<label class="col-sm-2 control-label" for="date-input">Date:</label>
+				<div class="col-sm-4">
+					<select class="form-control" name="dateselect" id="dateselect">
+						<option value="0" <?php if(isset($_POST['dateselect'])&&$_POST['dateselect']==0)echo 'selected';?>>Today</option>
+						<option value="1" <?php if(isset($_POST['dateselect'])&&$_POST['dateselect']==1)echo 'selected';?>>On date:</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group" id="dateinput" <?php if( !(isset($_POST['dateselect'])&&$_POST['dateselect']==1) )echo 'style="display:none"';?>>
+				<div class="col-sm-4 col-sm-offset-2">
+					<input class="form-control" name="date" placeholder="YYYY-MM-DD" value="<?php if(isset($_POST['date']))echo $_POST['date'];?>"/>
+				</div>
+			</div>
+			<div class="form-group">
 				<div class="col-sm-4 col-sm-offset-2">
 					<input type="submit" class="btn btn-primary" value="Submit"/>
 				</div>
 			</div>
 		</fieldset>
 	</form>
-	
+	<script type="text/javascript">
+		$('#dateselect').on('change',date_toggle);
+	</script>
 <?php
 	if(isset($message))echo $message;
 	require_once 'includes/footer.inc.php';

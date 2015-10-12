@@ -36,6 +36,11 @@ function bill_toggle(e){
 	document.forms["form"]["activity_code"].disabled = dnb;
 }
 
+function date_toggle(e){
+	var today = this.value==0;
+	$('#dateinput').css("display",today?"none":"block");
+}
+
 function pretty_filesize(filesize){
 	var sizestr = filesize+' KB';
 	if(filesize>1024)sizestr=(filesize/1024.0).toFixed(2)+' MB';
