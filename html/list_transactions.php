@@ -68,8 +68,8 @@
 	foreach($trans_list as $value){
 		$list_html .= "<tr>";
 		$list_html .= "<td>".($value['amount']<0?"Usage":"Payment")."</td>";
-		$list_html .= "<td>$".$value['amount']."</td>";
-		$list_html .= "<td>$"."</td>";
+		$list_html .= "<td ".($value['amount']<0?"style='color:red'":"").">".($value['amount']<0?"-":"")."$".abs($value['amount'])."</td>";
+		$list_html .= "<td>$".$value['balance']."</td>";
 		$list_html .= "<td>".html::get_pretty_date_mysql($value['transaction_time'])."</td>";
 		$list_html .= "<td>".$value['cfop']."</td>";
 		$list_html .= "<td>".$value['activity_code']."</td>";
