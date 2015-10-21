@@ -66,8 +66,17 @@
 		public function get_id(){
 			return $this->id;
 		}
+		public function get_directory_id(){
+			return $this->directory_id;
+		}
+		public function get_amount(){
+			return $this->amount;
+		}
 		public function get_balance(){
 			return $this->balance;
+		}
+		public function get_transaction_time(){
+			return $this->transaction_time;
 		}
 		
 		// Loads the transaction with the given id into this object

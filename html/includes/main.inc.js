@@ -6,6 +6,10 @@ function confirm_disable_directory(){
 	return confirm("Are you sure you wish to delete this directory?");
 }
 
+function confirm_delete_transaction(){
+	return confirm("Are you sure you wish to delete this transaction?");
+}
+
 function cfop_advance(num){
 	var inputname = "cfop_"+num;
 	var nextinput = "cfop_"+(num+1);

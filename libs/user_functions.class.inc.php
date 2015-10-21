@@ -55,7 +55,7 @@ class user_functions {
 	}
 	
 	public static function get_directories($db,$user){
-		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 ";
+		$sql = "select u.id as user_id, u.username, d.id as dir_id, d.directory, d.do_not_bill from directories d left join users u on d.user_id=u.id where d.is_enabled=1 and u.is_enabled=1 ";
 		$args = array();
 		if(!$user->is_admin()){
 			$sql .= "and u.id=:userid ";

@@ -51,7 +51,7 @@
 		<fieldset>
 			<legend>Log Transaction</legend>
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for="userid">Username:</label>
+				<label class="col-sm-2 control-label" for="userid">Directory:</label>
 				<div class="col-sm-4">
 					<?php echo $user_list_html;?>
 				</div>

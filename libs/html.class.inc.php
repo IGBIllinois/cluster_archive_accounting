@@ -117,6 +117,12 @@ class html {
 	public static function get_pretty_date($date) {
 		return substr($date,4,2) . "/" . substr($date,6,2) . "/" . substr($date,0,4);
 	}
+	// Takes a date given as YYYY-mm-dd HH:MM:SS and returns mm/dd/YYYY
+	public static function get_pretty_date_mysql($date){
+		$date_arr = date_parse($date);
+		$date_str = $date_arr['year'].($date_arr['month']<10?'0':'').$date_arr['month'].($date_arr['day']<10?'0':'').$date_arr['day'];
+		return self::get_pretty_date($date_str);
+	}
 
 	// Takes a size and the unit for that size ('B', 'KB', 'MB', 'GB') and returns a human-readable size
 	public static function human_readable_size($usage,$unit='MB',$decimal=4){

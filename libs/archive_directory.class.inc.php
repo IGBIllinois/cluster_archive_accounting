@@ -161,4 +161,10 @@
 			}
 			return $result;
 		}
+		
+		public function get_transaction_list($year){
+			$sql = "select t.*,a.cfop,a.activity_code from transactions t left join directories d on t.directory_id=d.id left join cfops a on a.directory_id=d.id left outer join cfops b on a.directory_id=b.directory_id and a.time_created<b.time_created where d.id=:id and year(t.transaction_time)=:year and b.directory_id is null order by t.transaction_time desc;";
+			$args = array(':id'=>$this->get_id(),':year'=>$year);
+			return $this->db->query($sql,$args);
+		}
 	}
