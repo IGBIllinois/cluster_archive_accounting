@@ -10,6 +10,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title><?php echo __TITLE__; ?></title>
 		<link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css" type="text/css"/>
+		<link rel="stylesheet" href="includes/main.inc.css" type="text/css"/>
 		<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon"/>
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
