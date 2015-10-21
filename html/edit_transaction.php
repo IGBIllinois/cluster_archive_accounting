@@ -1,4 +1,5 @@
 <?php
+	error_reporting(E_ALL);
 	require_once 'includes/header.inc.php';
 	if(!$login_user->is_admin()){
 		exit;
@@ -26,7 +27,8 @@
 		$sql = "delete from transactions where id=:id";
 		$args = array(':id'=>$_POST['id']);
 		$db->non_select_query($sql,$args);
-		header('location:list_transactions.php?directory_id='.$directory->get_id().'&year='.date_parse($transaction->get_transaction_time())['year']);
+		$date_arr = date_parse($transaction->get_transaction_time());
+		header('location:list_transactions.php?directory_id='.$directory->get_id().'&year='.$date_arr['year']);
 	}
 
 	?>
@@ -68,7 +70,7 @@
 					<div class="btn-group">
 						<input type="submit" class="btn btn-primary" name="edit_trans" value="Update"/>
 						<input type="submit" class="btn btn-danger" name="delete_trans" value="Delete" onClick='return (confirm_delete_transaction());'/>
-						<a href="list_transactions.php?directory_id=<?php echo $directory->get_id();?>&year=<?php echo date_parse($transaction->get_transaction_time())['year'];?>" class="btn btn-default">Cancel</a>
+						<a href="list_transactions.php?directory_id=<?php echo $directory->get_id();?>&year=<?php $date_arr = date_parse($transaction->get_transaction_time()); echo $date_arr['year'];?>" class="btn btn-default">Cancel</a>
 					</div>
 				</div>
 			</div>
