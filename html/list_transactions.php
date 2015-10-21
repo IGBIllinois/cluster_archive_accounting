@@ -21,6 +21,13 @@
 	
 	$end_date = date('Ymd',strtotime('-1 second',strtotime('+1 year',strtotime($start_date))));
 	
+	// User list
+	$dir_list = array();
+	$dir_list = user_functions::get_directories($db,$login_user);
+	if($directory_id==0){
+		$directory_id = $dir_list[0]['dir_id'];
+	}
+	
 	$directory = new archive_directory($db);
 	$directory->load_by_id($directory_id);
 	
@@ -29,12 +36,6 @@
         exit;
 	}
 	
-	// User list
-	$dir_list = array();
-	$dir_list = user_functions::get_directories($db,$login_user);
-	if($directory_id==0){
-		$directory_id = $dir_list[0]['dir_id'];
-	}
 	$dir_list_html = "";
 	if (count($dir_list)) {
         $dir_list_html = "<div class='form-group'><label class='inline'>Directory:</label> <select class='form-control input-sm' name='directory_id'>";
