@@ -43,7 +43,9 @@ class settings {
 	}
 	
 	public function set_setting($key,$value){
-		$sql = "update `settings` set `value`=:value,`modified`=NOW() where `key`=:key";
+		$sql = "update `settings_values` set `current`=0 where `key`=:key";
+		$this->db->non_select_query($sql,array(':key'=>$key));
+		$sql = "insert into `settings_values` (`key`,`value`,`modified`,`current`) values (:key,:value,now(),1)";
 		$args = array(':key'=>$key,':value'=>$value);
 		$result = $this->db->non_select_query($sql,$args);
 		
@@ -53,7 +55,7 @@ class settings {
 	}
 
 	public function load_settings(){
-		$settings = $this->db->query("select * from settings");
+		$settings = $this->db->query("select s.key, s.name, v.value, v.modified from settings s join settings_values v on s.key=v.key where v.current=1");
 		foreach ($settings as $key=>$setting){
 			$this->settings[$setting['key']] = new setting($setting['key'],$setting['value'],$setting['name'],$setting['modified']);
 		}

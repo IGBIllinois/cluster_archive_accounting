@@ -9,12 +9,11 @@ USE archive_accounting;
 DROP TABLE IF EXISTS `archive_files`;
 
 CREATE TABLE `archive_files` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `filename` varchar(256) NOT NULL DEFAULT '',
   `filesize` int(11) NOT NULL,
   `usage_id` int(11) unsigned NOT NULL DEFAULT '0',
   `file_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`filename`,`usage_id`),
   KEY `usage_id` (`usage_id`),
   CONSTRAINT `archive_files_ibfk_1` FOREIGN KEY (`usage_id`) REFERENCES `archive_usage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -32,7 +31,9 @@ CREATE TABLE `archive_usage` (
   `directory_size` int(11) NOT NULL DEFAULT '0' COMMENT 'directory size in MB',
   `num_small_files` int(11) NOT NULL DEFAULT '0',
   `usage_time` datetime NOT NULL,
-  `cost` varchar(16) NOT NULL DEFAULT '0',
+  `cost` varchar(16) NOT NULL DEFAULT '0' COMMENT 'what the cost should be',
+  `billed_cost` int(11) DEFAULT NULL COMMENT 'actual billed amount',
+  `tokens_used` int(11) DEFAULT NULL COMMENT 'number of tokens used',
   `pending` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -80,8 +81,6 @@ DROP TABLE IF EXISTS `settings`;
 
 CREATE TABLE `settings` (
   `key` varchar(64) NOT NULL DEFAULT '',
-  `value` varchar(64) NOT NULL DEFAULT '',
-  `modified` datetime NOT NULL,
   `name` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -89,13 +88,39 @@ CREATE TABLE `settings` (
 LOCK TABLES `settings` WRITE;
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 
-INSERT INTO `settings` (`key`, `value`, `modified`, `name`)
+INSERT INTO `settings` (`key`, `name`)
 VALUES
-	('data_cost','150','2015-08-21 10:48:38','Data Cost ($/TB)'),
-	('min_billable_data','51200','2015-08-06 16:43:11','Min Billable Data (MB)'),
-	('small_file_size','1048576','2015-08-21 10:49:47','Small File Size (KB)');
+	('data_cost','Cost per TB'),
+	('min_billable_data','Min Billable Data (MB)'),
+	('small_file_size','Small File Size (KB)');
 
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table settings_values
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `settings_values`;
+
+CREATE TABLE `settings_values` (
+  `key` varchar(64) NOT NULL DEFAULT '',
+  `value` varchar(64) NOT NULL DEFAULT '',
+  `modified` datetime NOT NULL,
+  `current` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`key`,`modified`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+LOCK TABLES `settings_values` WRITE;
+/*!40000 ALTER TABLE `settings_values` DISABLE KEYS */;
+
+INSERT INTO `settings_values` (`key`, `value`, `modified`, `current`)
+VALUES
+	('data_cost','150','2015-01-01 00:00:00',1),
+	('min_billable_data','51200','2015-01-01 00:00:00',1),
+	('small_file_size','1048576','2015-01-01 00:00:00',1);
+
+/*!40000 ALTER TABLE `settings_values` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
@@ -111,7 +136,7 @@ CREATE TABLE `transactions` (
   `usage_id` int(11) unsigned DEFAULT NULL,
   `transaction_time` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `usage_id` (`usage_id`),
+  UNIQUE KEY `usage_id` (`usage_id`),
   CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`usage_id`) REFERENCES `archive_usage` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

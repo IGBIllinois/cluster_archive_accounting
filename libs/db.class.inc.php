@@ -73,7 +73,7 @@ class db {
 		$result = $this->link->prepare($sql);
 		$retVal = $result->execute($args);
 		if ($retVal === false) {
-			log::log_message("INSERT ERROR: " . $sql,false);
+			log::log_message("INSERT ERROR: " . $sql."; ".implode(",", $args),false);
 		}
 		return $this->link->lastInsertId();
 	}
