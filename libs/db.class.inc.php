@@ -46,7 +46,7 @@ class db {
 		//Connects to database.
 		try {
 			$this->link = new PDO("mysql:host=$host;dbname=$database",$username,$password,
-					array(PDO::ATTR_PERSISTENT => true));
+					array(PDO::ATTR_PERSISTENT => false));
 // 			$this->link->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_WARNING);
 			$this->host = $host;
 			$this->database = $database;

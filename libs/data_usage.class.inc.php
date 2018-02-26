@@ -20,6 +20,7 @@
 		
 		// Inserts an entry with the given data into the database, and loads that entry into this object.
 		public function create($directory_id,$usage,$num_small_files){
+			// TODO the comments in this function don't make any sense
 			// If a usage tally was already created this month, remove it before adding the new one
 			//  The associated transaction and file entries will be removed automatically.
 			$sql = "select id,cost from archive_usage where month(usage_time)=month(NOW()) and year(usage_time)=year(NOW()) and directory_id=:dirid";
@@ -42,7 +43,7 @@
 			
 			if(count($existing)>0){
 				// Update existing usage
-				$sql = "update `archive_usage` set directory_size=:usage,num_small_files=:smallfiles,usage_time=NOW(),cost=:cost where id=:usageid";
+				$sql = "update `archive_usage` set directory_size=:usage,num_small_files=:smallfiles,usage_time=NOW(),cost=:cost,billed_cost=:cost where id=:usageid";
 				$args = array(':usage'=>$usage,':smallfiles'=>$num_small_files,':cost'=>$cost,':usageid'=>$existing[0]['id']);
 				$this->db->non_select_query($sql,$args);
 				$this->load_by_id($existing[0]['id']);
@@ -69,7 +70,7 @@
 			} else {
 				// Create new usage
 				// Save info to database
-				$sql = "insert into `archive_usage` (`directory_id`,`directory_size`,`num_small_files`,`usage_time`,`cost`,`pending`) values (:dirid,:usage,:smallfiles,NOW(),:cost,1)";
+				$sql = "insert into `archive_usage` (`directory_id`,`directory_size`,`num_small_files`,`usage_time`,`cost`,`billed_cost`,`pending`) values (:dirid,:usage,:smallfiles,NOW(),:cost,:cost,1)";
 				$args = array(':dirid'=>$directory_id,':usage'=>$usage,':smallfiles'=>$num_small_files,':cost'=>$cost);
 				$this->id = $this->db->insert_query($sql,$args);
 				$this->load_by_id($this->id);
@@ -84,7 +85,7 @@
 			return $this;
 		}
 		
-		// Calculates the cost of a given directory size, based on the current settings and the previous month's usage data.
+		// Calculates the cost of a given directory size, based on the current settings and the previous month's usage data. TODO no it doesn't
 		private static function dataCost($db,$usage,$directory_id){
 			$sql = "select do_not_bill from directories where id=:id";
 			$args = array(':id'=>$directory_id);

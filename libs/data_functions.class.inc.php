@@ -21,12 +21,7 @@ class data_functions {
 		    and year(archive_usage.usage_time)=:prevyear
 		    and month(archive_usage.usage_time)=:prevmonth
 		  ) as Previous_Usage, 
-		  archive_usage.cost as Cost, 
-		  (select sum(transactions.amount) 
-		    from transactions 
-		    where transactions.directory_id=directories.id 
-		    and ((month(transaction_time)<=:month and year(transaction_time)=:year) or year(transaction_time)<:year)
-		  ) as Balance, 
+		  archive_usage.billed_cost as Cost, 
 		  cfops.cfop as CFOP, 
 		  cfops.activity_code as Activity_Code
 		FROM archive_usage 
