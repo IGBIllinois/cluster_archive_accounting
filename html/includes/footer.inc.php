@@ -6,7 +6,7 @@
 					<li><a href="user.php">User Information</a></li>
 					<li><a href="user_bill.php">User Bill</a></li>
 					<li><a href="user_graphs.php">User Graphs</a></li>
-					<li><a href="user_files.php">User Files</a></li>
+<!-- 					<li><a href="user_files.php">User Files</a></li> -->
 					<?php
 					if ( isset($login_user) && $login_user->is_admin() ){
 						?>

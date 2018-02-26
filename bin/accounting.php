@@ -41,7 +41,8 @@ else {
 			$usage = exec("du -sm ".__ARCHIVE_DIR__.$row['directory']);
 			preg_match("/^(.*)\\t/u", $usage, $matches);
 			$usage = $matches[1];
-			
+			echo $usage.' MB... ';
+/*
 			// Per-file info
 			// Usage in KB
 			unset($allfiles);
@@ -54,10 +55,16 @@ else {
 					$numsmallfiles += 1;
 				}
 			}
-			
+*/
+			unset($allfiles);
+			exec("find ".__ARCHIVE_DIR__.$row['directory']." -type f -size -".$settings->get_setting('small_file_size')."k | wc -l", $allfiles);
+			$numsmallfiles = trim($allfiles[0]);
+			echo $numsmallfiles.' small files... ';
 			// Store usage data in database
 			$data_usage->create($row['id'],$usage,$numsmallfiles);
-			echo $usage.' MB, '.count($allfiles)." files... ";
+			
+
+/*
 			// Remove existing file records
 			$sql = "delete from archive_files where usage_id=:usageid";
 			$args = array(':usageid'=>$data_usage->get_id());
@@ -74,6 +81,7 @@ else {
 				// Store file info in database
 				$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
 			}
+*/
 			
 			// Set previous month's usage to not pending
 			$latestUsage = data_usage::usage_from_month($db,$row['id'],$prevmonth,$prevyear);
@@ -86,15 +94,17 @@ else {
 			}
 			
 			echo "Done.\n";
-			log::log_message("Scanned ".__ARCHIVE_DIR__.$row['directory'].': '.$usage.' MB, '.count($allfiles).' files.');
+			log::log_message("Scanned ".__ARCHIVE_DIR__.$row['directory'].': '.$usage.' MB.');
 		} else {
 			log::log_message("Directory ".__ARCHIVE_DIR__.$row['directory'].' does not exit.');
 		}
 	}
 	// Email users with bills from last month
+/*
 	$user = new user($db,$ldap);
 	foreach ($email_users as $userid){
 		$user->load_by_id($userid);
 		$user->email_bill(__ADMIN_EMAIL__);
 	}
+*/
 }
