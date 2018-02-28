@@ -18,8 +18,10 @@
 					<li><a href="list_users.php">List Users</a></li>
 					<li><a href="add_user.php">Add User</a></li>
 					<li><a href="add_directory.php">Add Directory</a></li>
-					<li><a href="log_transaction.php">Log Transaction</a></li>
-					<li><a href="list_transactions.php">Transaction List</a></li>
+
+					<li><a href="add_tokens.php">Pre-Pay</a></li>
+<!--					<li><a href="list_transactions.php">Transaction List</a></li>
+-->
 					<li><a href="unwatched_dirs.php">Unmonitored Directories</a></li>
 					<li><a href="settings.php">Settings</a></li>
 						<?php	

@@ -79,11 +79,12 @@
 			$data_html .= "<td>".$value['prevusage']." TB</td>";
 			if($value['do_not_bill']==0){
 				$data_html .= "<td>$".number_format($value['cost'],2)."</td>";
-				$data_html .= "<td>$".number_format($value['balance'],2)."</td>";
+				$data_html .= "<td>$".number_format($value['billed_cost'],2)."</td>";
+				$data_html .= "<td>".$value['tokensused']."</td>";
 				$data_html .= "<td>".$value['cfop']."</td>";
 				$data_html .= "<td>".$value['activity_code']."</td>";
 			} else {
-				$data_html .= "<td colspan='4'></td>";
+				$data_html .= "<td colspan='5'></td>";
 			}
 			$data_html .= "</tr>";
 		}
@@ -129,7 +130,8 @@
 				<th>Usage</th>
 				<th>Previous Usage</th>
 				<th>Cost</th>
-				<th>Balance</th>
+				<th>Billed Cost</th>
+				<th>Pre-paid Terabytes Used</th>
 				<th>CFOP</th>
 				<th>Activity Code</th>
 			</tr>

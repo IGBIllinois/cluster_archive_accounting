@@ -129,19 +129,21 @@ class user {
 					u.num_small_files, 
 					u.usage_time, 
 					u.cost as cost, 
+					u.billed_cost as billed_cost,
+					ifnull(t.transaction_amount,0)*-1 as tokensused,
 					coalesce((select ROUND(u1.directory_size/1048576,4) from archive_usage u1 where u1.directory_id=u.directory_id and year(u1.`usage_time`)=:prevyear and month(u1.`usage_time`)=:prevmonth order by u1.usage_time limit 1),0) as prevusage, 
-					(select sum(t1.amount) from transactions t1 where (year(t1.transaction_time)<:year or (year(t1.transaction_time)=:year and month(t1.transaction_time)<:month)) and t1.directory_id=d.id) as balance, 
 					c.cfop as cfop, 
 					c.activity_code, 
 					d.do_not_bill as do_not_bill 
 				FROM archive_usage u 
 				left join directories d on u.directory_id=d.id 
 				left join cfops c on d.id=c.directory_id 
+				left join token_transactions t on u.token_transaction_id=t.id 
 				WHERE d.user_id=:id 
 				and c.active=1 
 				AND YEAR(u.`usage_time`)=:year 
 				AND MONTH(u.`usage_time`)=:month 
-				order by u.usage_time";
+				order by d.directory";
         $args = array(':id'=>$this->get_user_id(),':year'=>$year,':month'=>$month,':prevyear'=>$prevyear,':prevmonth'=>$prevmonth);
         return $this->db->query($sql,$args);
 	}

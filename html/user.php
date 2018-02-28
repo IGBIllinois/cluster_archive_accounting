@@ -17,17 +17,16 @@
 		$directories = $user->get_directories();
 		foreach($directories as $directory){
 			$usage = data_usage::latestUsage($db,$directory->get_id());
-			$balance = transaction::latestTransaction($db,$directory->get_id());
 			$directory_html .= "<tr class='topborder'><td>Directory:</td><td>".__ARCHIVE_DIR__.$directory->get_directory();
 			$directory_html .= "</td></tr>";
 			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>CFOP:</td><td>".$directory->get_cfop()."</td></tr>";
 			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Activity Code:</td><td>".$directory->get_activity_code()."</td></tr>";
 			$directory_html .= "<tr><td>Usage:</td><td>".number_format($usage->get_directory_size()/1048576,4)." TB</td></tr>";
-			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Balance:</td><td>$".$balance->get_balance()."</td></tr>";
+			if($directory->get_do_not_bill()==0) $directory_html .= "<tr><td>Pre-paid Terabytes:</td><td>".token_transaction::tokenBalance($db,$directory->get_id())."</td></tr>";
 			if($login_user->is_admin() && count($directories)>1){
 				$directory_html .= "<tr><td></td><td><div class='btn-group btn-group-sm'>";
 				$directory_html .= "<a href='edit_directory.php?directory_id=".$directory->get_id()."' class='btn btn-primary'><span class='glyphicon glyphicon-pencil'></span> Edit Directory</a>";
-				$directory_html .= '<a href="log_transaction.php?directory_id='.$directory->get_id().'" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Add Transaction</a>';
+				$directory_html .= '<a href="add_tokens.php?directory_id='.$directory->get_id().'" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Pre-pay</a>';
 				$directory_html .= "</div></td></tr>";
 			}
 		}
@@ -85,7 +84,7 @@
 		<a href="edit_user.php?user_id=<?php echo $user_id; ?>" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit User</a>
 		<?php if(count($user->get_directories())==1){?>
 		<a href="edit_directory.php?directory_id=<?php echo $directories[0]->get_id();?>" class="btn btn-primary btn"><span class="glyphicon glyphicon-pencil"></span> Edit Directory</a>
-		<a href="log_transaction.php?directory_id=<?php echo $directories[0]->get_id(); ?>" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Add Transaction</a>
+		<a href="add_tokens.php?directory_id=<?php echo $directories[0]->get_id(); ?>" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Pre-pay</a>
 		<?php } ?>
 		<a href="user_bill.php?user_id=<?php echo $user_id; ?>" class="btn btn-info">User Bill</a>
 	</div>

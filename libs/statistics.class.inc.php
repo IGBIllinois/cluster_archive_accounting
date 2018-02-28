@@ -48,7 +48,22 @@
 		
 		// Sum of all costs incurred between the given dates
 		public function get_total_cost($start_date,$end_date,$format=0){
-			$sql = "select sum(cost) as cost from archive_usage where date(usage_time) between :start and :end";
+			$sql = "select sum(cost) as cost from archive_usage join directories on directories.id=directory_id where date(usage_time) between :start and :end and is_enabled=1 and do_not_bill=0";
+			$args = array(':start'=>$start_date,':end'=>$end_date);
+			$result = $this->db->query($sql,$args);
+			$total_cost = $result[0]['cost'];
+			if($total_cost==""){
+				$total_cost="0.00";
+			}
+			if($format == true){
+				$total_cost = number_format($total_cost,2);
+			}
+			return $total_cost;
+		}
+		
+		// Sum of all billed costs incurred between the given dates
+		public function get_total_billed_cost($start_date,$end_date,$format=0){
+			$sql = "select sum(billed_cost) as cost from archive_usage where date(usage_time) between :start and :end";
 			$args = array(':start'=>$start_date,':end'=>$end_date);
 			$result = $this->db->query($sql,$args);
 			$total_cost = $result[0]['cost'];

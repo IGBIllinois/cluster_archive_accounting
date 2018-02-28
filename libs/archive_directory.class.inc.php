@@ -11,8 +11,11 @@
 		private $enabled;
 		private $do_not_bill;
 		
-		public function __construct($db){
+		public function __construct($db,$id=0){
 			$this->db = $db;
+			if($id != 0){
+				$this->load_by_id($id);
+			}
 		}
 		public function __destruct(){}
 		

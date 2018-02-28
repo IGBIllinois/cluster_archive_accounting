@@ -27,6 +27,7 @@
 			$data_html .= "<td>".number_format($value['Usage'],4)." TB</td>";
 			$data_html .= "<td>".number_format($value['Previous_Usage'],4)." TB</td>";
 			$data_html .= "<td>$".number_format($value['Cost'],2)."</td>";
+			$data_html .= "<td>$".number_format($value['Billed_Cost'],2)."</td>";
 			$data_html .= "<td>".$value['CFOP']."</td>";
 			$data_html .= "<td>".$value['Activity_Code']."</td>";
 			$data_html .= "</tr>";
@@ -58,6 +59,7 @@
             <th>Usage</th>
             <th>Previous Usage</th>
             <th>Cost</th>
+            <th>Billed Cost</th>
             <th>CFOP</th>
             <th>Activity Code</th>
         </tr>
@@ -65,8 +67,9 @@
     <?php echo $data_html; ?>
     <tr>
         <td colspan="4">Total Cost:</td>
-        <td colspan='4'>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?>
-        </td>
+        <td>$<?php echo $statistics->get_total_cost($start_date,$end_date,1); ?></td>
+        <td>$<?php echo $statistics->get_total_billed_cost($start_date,$end_date,1); ?></td>
+        <td colspan="2"></td>
 	</tr>
 </table>
 <form class="form-inline" method="post" action="report.php">

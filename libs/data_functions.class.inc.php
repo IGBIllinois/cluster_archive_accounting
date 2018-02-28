@@ -21,7 +21,8 @@ class data_functions {
 		    and year(archive_usage.usage_time)=:prevyear
 		    and month(archive_usage.usage_time)=:prevmonth
 		  ) as Previous_Usage, 
-		  archive_usage.billed_cost as Cost, 
+		  archive_usage.cost as Cost, 
+		  archive_usage.billed_cost as Billed_Cost,
 		  cfops.cfop as CFOP, 
 		  cfops.activity_code as Activity_Code
 		FROM archive_usage 
