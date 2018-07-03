@@ -7,8 +7,7 @@ if(isset($_POST['create_data_report'])){
 	$year = $_POST['year'];
 	$type = $_POST['report_type'];
 	$data = data_functions::get_data_bill($db,$month,$year);
-	$server_name = settings::get_server_name();
-	$filename = $server_name."-".$month."-".$year.".".$type;
+	$filename = "activearchive-".$month."-".$year.".".$type;
 }
 else {
 	exit;
