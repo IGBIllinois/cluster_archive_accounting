@@ -51,14 +51,33 @@
 			$this->enabled =		$results[0]['is_enabled'];
 			$this->do_not_bill =	$results[0]['do_not_bill'];
 		}
+		public static function get_all_directories($db){
+			$sql = "select id from directories order by directory";
+			$results = $db->query($sql,array());
+			$directories = array();
+			foreach($results as $row){
+				$directories[] = new archive_directory($db,$row['id']);
+			}
+			return $directories;
+		}
 		public function get_id(){
 			return $this->id;
 		}
 		public function get_user_id(){
 			return $this->user_id;
 		}
+		public function get_user(){
+			global $ldap; // This is a lesser evil than passing $ldap around everywhere for this one function. Fight me.
+			return new user($this->db,$ldap,$this->user_id);
+		}
+		public function get_latest_usage(){
+			return data_usage::latestUsage($this->db,$this->id);
+		}
 		public function get_directory(){
 			return $this->directory;
+		}
+		public function get_enabled(){
+			return $this->enabled;
 		}
 		public function get_cfop() {
 			return $this->cfop;
@@ -80,6 +99,9 @@
 		}
 		public function get_do_not_bill() {
 			return $this->do_not_bill;
+		}
+		public function get_time_created(){
+			return $this->time_created;
 		}
 		
 		public static function is_disabled($db,$directory){
