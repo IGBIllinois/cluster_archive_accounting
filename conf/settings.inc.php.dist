@@ -28,7 +28,8 @@ define("__LDAP_PORT__",389);
 define("__ADMIN_EMAIL__","");
 define("__SESSION_NAME__","archive_accounting");
 define("__SESSION_TIMEOUT__",3600);
- 
+
+define("__USE_BUCKETS__", false);
 define("__ARCHIVE_DIR__", "");
 define("__ROOT_DATA_DIRS__", "");
  

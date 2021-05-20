@@ -61,7 +61,9 @@
 			<label class="col-sm-2 control-label">Directory:</label>
 			<div class="col-sm-4">
 				<div class="input-group">
-					<span class="input-group-addon"><?php echo __ARCHIVE_DIR__;?></span>
+					<?php if (!__USE_BUCKETS__){ ?>
+                    <span class="input-group-addon"><?php echo __ARCHIVE_DIR__;?></span>
+                    <?php } ?>
 					<input class="form-control" type="text" name="archive_dir" id="archive-dir-input" value="<?php echo $directory->get_directory();?>"/>
 				</div>
 			</div>

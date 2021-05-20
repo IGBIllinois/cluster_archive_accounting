@@ -34,70 +34,71 @@ else {
 	}
 	$email_users = array();
 	foreach ( $rows as $key=>$row ){
-		if(file_exists(__ARCHIVE_DIR__.$row['directory'])){
-			echo __ARCHIVE_DIR__.$row['directory']."... ";
-			// Gather usage info
-			// Total Usage in MB
-			$usage = exec("du -sm ".__ARCHIVE_DIR__.$row['directory']);
-			preg_match("/^(.*)\\t/u", $usage, $matches);
-			$usage = $matches[1];
-			echo $usage.' MB... ';
-/*
-			// Per-file info
-			// Usage in KB
-			unset($allfiles);
-			exec("find ".__ARCHIVE_DIR__.$row['directory']." -type f -exec du -ak {} +",$allfiles);
-			// Tally up "small" files
-			$numsmallfiles = 0;
-			foreach ( $allfiles as $key=>$file ){
-				preg_match("/^(.*)\\t(.*)/u", $file, $matches);
-				if( archive_file::isSmall($db,$matches[2],$matches[1]) ){
-					$numsmallfiles += 1;
-				}
-			}
-*/
-			unset($allfiles);
-			exec("find ".__ARCHIVE_DIR__.$row['directory']." -type f -size -".$settings->get_setting('small_file_size')."k | wc -l", $allfiles);
-			$numsmallfiles = trim($allfiles[0]);
-			echo $numsmallfiles.' small files... ';
-			// Store usage data in database
-			$data_usage->create($row['id'],$usage,$numsmallfiles);
-			
+	    if(__USE_BUCKETS__){
+	        echo sprintf("Bucket '%s'...", $row['directory']);
+            // Gather usage info
+            // Total Usage in MB
+            $usage = exec("get_bucket_size.py --bucket=".$row['directory']);
+            preg_match("/^[^\t]*\\t(.*)/u", $usage, $matches);
+            $usage = $matches[1]/1024;
+            echo $usage . ' MB... ';
 
-/*
-			// Remove existing file records
-			$sql = "delete from archive_files where usage_id=:usageid";
-			$args = array(':usageid'=>$data_usage->get_id());
-			$db->non_select_query($sql,$args);
-			foreach ( $allfiles as $key=>$file ){
-				preg_match("/^(.*)\\t(.*)/u", $file, $matches);
-				// Get date modified info for each file and save to database
-				// Development environment uses this command (BSD)
-				//  $datestr = exec("ls -lT '".$matches[2]."' | awk '{print $6,$7,$9, $8}'");
-				//  $date = DateTime::createFromFormat('M d Y H:i:s',$datestr);
-				// Production environment uses this command (Linux)
-				$datestr = exec("stat --format='%Y' '".$matches[2]."'");
-				$date = DateTime::createFromFormat('U',$datestr);
-				// Store file info in database
-				$arch_file->create($matches[2],$matches[1],$data_usage->get_id(),$date->format('Y-m-d H:i:s'));
-			}
-*/
-			
-			// Set previous month's usage to not pending
-			$latestUsage = data_usage::usage_from_month($db,$row['id'],$prevmonth,$prevyear);
-			if($latestUsage->get_pending()==1){
-				$latestUsage->set_pending(0);
-				$dir->load_by_id($latestUsage->get_directory_id());
-				if($latestUsage->get_cost()>0 && !in_array($dir->get_user_id(),$email_users)){
-					array_push($email_users, $dir->get_user_id());
-				}
-			}
-			
-			echo "Done.\n";
-			log::log_message("Scanned ".__ARCHIVE_DIR__.$row['directory'].': '.$usage.' MB.');
-		} else {
-			log::log_message("Directory ".__ARCHIVE_DIR__.$row['directory'].' does not exit.');
-		}
+            $numsmallfiles = 0;
+
+            // Store usage data in database
+            $data_usage->create($row['id'], $usage, $numsmallfiles);
+
+            // Set previous month's usage to not pending
+            $latestUsage = data_usage::usage_from_month($db, $row['id'], $prevmonth, $prevyear);
+            if ($latestUsage->get_pending() == 1) {
+                $latestUsage->set_pending(0);
+                $dir->load_by_id($latestUsage->get_directory_id());
+                if ($latestUsage->get_cost() > 0 && !in_array($dir->get_user_id(), $email_users)) {
+                    array_push($email_users, $dir->get_user_id());
+                }
+            }
+
+            echo "Done.\n";
+            log::log_message("Scanned bucket " . $row['directory'] . ': ' . $usage . ' MB.');
+        } else {
+            if (file_exists(__ARCHIVE_DIR__ . $row['directory'])) {
+                echo __ARCHIVE_DIR__ . $row['directory'] . "... ";
+                // Gather usage info
+                // Total Usage in MB
+                $usage = exec("du -sm " . __ARCHIVE_DIR__ . $row['directory']);
+                preg_match("/^(.*)\\t/u", $usage, $matches);
+                $usage = $matches[1];
+                echo $usage . ' MB... ';
+
+                // # of small files
+                unset($allfiles);
+                exec(
+                    "find " . __ARCHIVE_DIR__ . $row['directory'] . " -type f -size -" . $settings->get_setting(
+                        'small_file_size'
+                    ) . "k | wc -l",
+                    $allfiles
+                );
+                $numsmallfiles = trim($allfiles[0]);
+                echo $numsmallfiles . ' small files... ';
+                // Store usage data in database
+                $data_usage->create($row['id'], $usage, $numsmallfiles);
+
+                // Set previous month's usage to not pending
+                $latestUsage = data_usage::usage_from_month($db, $row['id'], $prevmonth, $prevyear);
+                if ($latestUsage->get_pending() == 1) {
+                    $latestUsage->set_pending(0);
+                    $dir->load_by_id($latestUsage->get_directory_id());
+                    if ($latestUsage->get_cost() > 0 && !in_array($dir->get_user_id(), $email_users)) {
+                        array_push($email_users, $dir->get_user_id());
+                    }
+                }
+
+                echo "Done.\n";
+                log::log_message("Scanned " . __ARCHIVE_DIR__ . $row['directory'] . ': ' . $usage . ' MB.');
+            } else {
+                log::log_message("Directory " . __ARCHIVE_DIR__ . $row['directory'] . ' does not exist.');
+            }
+        }
 	}
 	// Email users with bills from last month
 /*
