@@ -46,11 +46,11 @@ def printResults(_bucket, _bucketSize, _objectCount, _size, _count, _human):
   if(_size == True and _count == True and _human == True):   
     print(_bucket.ljust(_pad)+"\t"+human_size(_bucketSize)+"\t"+str(_objectCount))
   elif(_size == True and _count == True ):
-    print(_bucket.ljust(_pad)+"\t"+str(int(_bucketSize/1000))+"\t"+str(_objectCount))
+    print(_bucket.ljust(_pad)+"\t"+str(int(_bucketSize/1024))+"\t"+str(_objectCount))
   elif(_size==True and _human == True):
     print(_bucket.ljust(_pad)+"\t"+human_size(_bucketSize))
   elif(_size==True):
-    print(_bucket.ljust(_pad)+"\t"+str(int(_bucketSize/1000)))
+    print(_bucket.ljust(_pad)+"\t"+str(int(_bucketSize/1024)))
   elif(_count==True):
     print(_bucket.ljust(_pad)+"\t"+str(_objectCount))
   else:
