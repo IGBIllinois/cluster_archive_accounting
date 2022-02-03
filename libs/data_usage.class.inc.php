@@ -42,7 +42,7 @@
 			// Get this month's usage bracket
 			$currentBracket = self::terabyteBracket($this->db,$usage);
 			
-			$bracketChange = $currentBracket - $latestBracket;
+			$bracketChange = max(0,$currentBracket - $latestBracket);
 			$cost = $bracketChange * $settings->get_setting("data_cost"); // This is the theoretical cost of the month.
 			$billed_cost = $cost;
 
