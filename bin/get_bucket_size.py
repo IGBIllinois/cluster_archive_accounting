@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(description='du style output for the Black Pear
 parser.add_argument('--size', action='store_true', default=True, help='Print the size of the buckets')
 parser.add_argument('--count', action='store_true', default=False, help='Print the number of objects in the buckets')
 parser.add_argument('--human', action='store_true', default=False, help="make results human readable")
+parser.add_argument('--endpoint', type=str, help='S3 endpoint to connect to. Not needed if using environment variables.')
 parser.add_argument('--access', type=str, help='Access key, not needed if environment variables exist')
 parser.add_argument('--secret', type=str, help='Secret key, not needed if environment variables exist')
 parser.add_argument('--bucket', type=str, help="Bucket Name, only needed if you are only wanting to look at one bucket")
@@ -59,14 +60,14 @@ def printResults(_bucket, _bucketSize, _objectCount, _size, _count, _human):
 
 
 #if keys are provided, use those
-if(args.access != None and args.secret != None):
-  client = ds3.Client("bioarchive.data.igb.illinois.edu",ds3.Credentials(args.access, args.secret))
+if(args.endpoint != None and args.access != None and args.secret != None):
+  client = ds3.Client(args.endpoint,ds3.Credentials(args.access, args.secret))
 #if no keys, then try environment variables  
 elif(args.access == None and args.secret == None):
   client = ds3.createClientFromEnv()
 #if you only have secret or access key, throw an error message  
 else:
-  print("If not loading from environment, buth --access and --secret are required")
+  print("Either --endpoint, --access, and --secret or DS3_ACCESS_KEY, DS3_SECRET_KEY, and DS3_ENDPOINT environment variables are required")
   quit()
   
 
